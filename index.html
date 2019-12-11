@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Vue, Axios and Google Books</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div id="app">
+  <form id="book-search" @submit.prevent="search">
+    <label>
+      <span>Search for a book</span>
+      
+      <input type="text" v-model:trim="searchTerm" placeholder="⌕ Type Author, book name, subject....">
+    </label>
+    
+    <button type="submit">Search</button>
+   
+    
+  </form>
+  <div></div>
+   <img src="https://thumbs.dreamstime.com/b/icons-eat-sleep-read-vector-icons-eat-sleep-read-107189110.jpg"></img>
+
+  
+  <ol class="search-results">
+    <li class="search-result" v-for="book in searchResults.items">
+      <img :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" class="search-result--thumbnail">
+      
+      <ul class="search-result--info">
+        <li class="search-result--title">{{ book.volumeInfo.title }}</li>
+        
+        <li v-if="book.volumeInfo.authors" class="search-result--authors">
+          by {{ bookAuthors(book) }}
+        </li>
+        
+        <li v-if="book.volumeInfo.publishedDate" class="search-result--published">
+          <span>Published </span> {{ book.volumeInfo.publishedDate }}
+        </li>
+      </ul>
+    </li>
+  </ol>
+  
+  <img src="https://thumbs.dreamstime.com/b/icons-eat-sleep-read-vector-icons-eat-sleep-read-107189110.jpg" id="all-the-books" v-if="searchResults.items">
+</div>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js'></script><script  src="./script.js"></script>
+
+</body>
+</html>
