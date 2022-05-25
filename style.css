@@ -29,8 +29,10 @@ body {
 }
 
 img {
-  
-  left-margin: -40px;
+    display: flex;
+  align-content: center;
+  align-items: flex-end;
+
 }
 
 
