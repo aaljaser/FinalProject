@@ -27,12 +27,13 @@ body {
 
   
 }
-
+.fixed{
+}
 img {
-    display: flex;
-  align-content: center;
-  align-items: flex-end;
-
+        position: fixed;
+        padding: 100px;
+        top: 150;
+        left: 110;
 }
 
 
