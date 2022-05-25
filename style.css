@@ -24,6 +24,10 @@ body {
   margin: auto;
   background-color: #faf7f6;
   color: #805466;
+  
+}
+img {
+lign-content: center;
 }
 
 #app {
