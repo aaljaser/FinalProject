@@ -28,7 +28,7 @@ body {
   
 }
 
- .mis{
+ #mis{
         position: fixed;
         padding: 100px;
         top: 150;
