@@ -24,11 +24,15 @@ body {
   margin: auto;
   background-color: #faf7f6;
   color: #805466;
-  
+  backgro
 }
 img {
- margin-left: 80px;
+  padding-right: 80p;
+
+
+  padding-left: 80px;
 }
+
 
 #app {
   padding: 5%;
