@@ -28,11 +28,10 @@ body {
   
 }
 
-  .center {
+img {
   display: block;
   margin-left: 40px;
-  margin-right: auto;
-  
+  margin-right: 80px;
 
 }
 
