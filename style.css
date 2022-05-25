@@ -29,9 +29,9 @@ body {
 }
 
 img {
-  display: block;
-  margin-left: 40px;
-  margin-right: 80px;
+  
+  margin-left: 0px;
+  margin-right: 180px;
 
 }
 
@@ -65,7 +65,7 @@ input {
 button {
   background: ff9900;
   position: relative;
-  color: lightgray;
+  color: ff9900;
   border: none;
   padding: 0 .75rem;
   border-radius: .25rem;
