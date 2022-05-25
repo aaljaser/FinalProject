@@ -25,14 +25,14 @@ body {
   background-color: #faf7f6;
   color: #805466;
   backgro
-  img-position 
+  
 }
 
   .center {
   display: block;
-  margin-left: auto;
+  margin-left: 40px;
   margin-right: auto;
-  width: 50%;
+  
 
 }
 
