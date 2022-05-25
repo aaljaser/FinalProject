@@ -25,8 +25,9 @@ body {
   background-color: #faf7f6;
   color: #805466;
   backgro
+  img-position 
 }
-.mis {
+.center {
   padding-right: 0px;
 
 
@@ -61,7 +62,7 @@ input {
 }
 
 button {
-  background: orangered;
+  background: ff9900;
   position: relative;
   color: lightgray;
   border: none;
