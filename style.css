@@ -27,7 +27,7 @@ body {
   background-image: url("https://i.ibb.co/cD9hVY8/IMG-0041-removebg-preview.png");
   
 }
-body.background-image{background-repeat: no-repeat;
+body.div.background-image{background-repeat: no-repeat;
   background-position: right ;
   margin-right: 200px;
   background-attachment: fixed;
