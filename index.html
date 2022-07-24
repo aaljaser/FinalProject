@@ -14,7 +14,7 @@
  
 
   
-
+ <div id="app">
 
  
  <form id="book-search" @submit.prevent="search">
@@ -30,7 +30,7 @@
   </form>
   
 
-  <div id="app">
+ 
   <ol class="search-results">
     <li class="search-result" v-for="book in searchResults.items">
       <img :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" class="search-result--thumbnail">
