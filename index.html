@@ -9,48 +9,53 @@
  
 </head>
 <body>
-  <img src="https://i.ibb.co/cD9hVY8/IMG-0041-removebg-preview.png" style="position:centere;"> 
+ 
 <!-- partial:index.partial.html -->
  
 
   
  <div id="app">
 
- 
- <form id="book-search" @submit.prevent="search">
-    <label>
-      <span>Search for a book</span>
-      
-      <input type="text" v-model:trim="searchTerm" placeholder="⌕ Type Author, book name, subject....">
-    </label>
-    
-    <button type="submit">Search</button>
-   
-    
-  </form>
+
   
+ <main>
+
+  <form id="book-search" @submit.prevent="search" class="search-form">
+         
+    <label >   <span>  Search for a book </span>    <br>
+    </label>    
+   <input class="v" type="text" v-model:trim="searchTerm" placeholder="⌕ Type Author, book name, subject....">
+<br><br>  
+     <button class="pushable">
+      <span class="shadow"></span>
+      <span class="edge"></span>
+      <span class="front">
+     search
+      </span>
+    </button>
+  </form>
 
  
-  <ol class="search-results">
-    <li class="search-result" v-for="book in searchResults.items">
-      <img :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" class="search-result--thumbnail">
+<br>
+  <form class="search-results">
+    <div class="search-result" v-for="book in searchResults.items">
+      <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" >
       
-      <ul class="search-result--info">
-        <li class="search-result--title">{{ book.volumeInfo.title }}</li>
+      <div class="search-result--info">
+        <div class="search-result--title">{{ book.volumeInfo.title }}</li>
         
-        <li v-if="book.volumeInfo.authors" class="search-result--authors">
+        <div v-if="book.volumeInfo.authors" class="search-result--authors">
           by {{ bookAuthors(book) }}
-        </li>
+        </div>
         
-        <li v-if="book.volumeInfo.publishedDate" class="search-result--published">
+        <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
           <span>Published </span> {{ book.volumeInfo.publishedDate }}
-        </li>
-      </ul>
-    </li>
-  </ol>
+        </div>
+      </div>
+    </div>
+  </form>
   
-  <img src="https://thumbs.dreamstime.com/b/icons-eat-sleep-read-vector-icons-eat-sleep-read-107189110.jpg" id="all-the-books" v-if="searchResults.items">
-</div>
+ 
 <!-- partial -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js'></script><script  src="./script.js"></script>
