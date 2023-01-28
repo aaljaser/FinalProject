@@ -136,8 +136,8 @@ justify-content: space-around;
 
 
  .search-result { 
-    margin-top: 20px;
-    justify-content: space-between;
+    margin-top: 10px;
+  
     background-color:gainsboro;
     position: relative;
     
@@ -152,36 +152,17 @@ justify-content: space-around;
 
 
   
-  * {
-  margin: 0;
-  padding: 0;
+  
+
+body {
+	background: linear-gradient(-45deg, #ee7752, #4e786d, #396474, #101110bc);
+
+	animation: gradient 6s ease infinite;
+  
+
+  text-align: center;
 }
-
-html, body {
-  height: 100%;
-}
-
-
-
-svg {
-  position:inherit;
-  top: 0px;
-  height: 20%;
-  left: 5%;
-  width: 15%;}
-  .top {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-   
-    position: fixed;
-    top: 0;
-    width: 100%;
-  }
-
-body { background: rgb(185, 183, 175);text-align: center;}
-
+*/
 
 
 
