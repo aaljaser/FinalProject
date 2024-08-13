@@ -4,37 +4,41 @@ new Vue({
     return {
       searchTerm: '',
       searchResults: [],
+      isLoading: false,
+      errorMessage: ''
     }
-  },//#f3edeb
+  },
   methods: {
-    search() {
-      axios.get(`https://www.googleapis.com/books/v1/volumes?q=` + this.searchTerm)
-      .then(response => {
-        this.searchResults = response.data
-      })
-      .catch(e => {
-        console.log(e)
-      })
-    },
+    search: _.debounce(function() {
+      if (!this.searchTerm) {
+        this.searchResults = [];
+        return;
+      }
+
+      this.isLoading = true;
+      this.errorMessage = '';
+      
+      axios.get(`https://www.googleapis.com/books/v1/volumes?q=` + encodeURIComponent(this.searchTerm))
+        .then(response => {
+          this.searchResults = response.data.items || [];
+        })
+        .catch(e => {
+          this.errorMessage = 'An error occurred while fetching the data.';
+          console.error(e);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    }, 300),
 
     bookAuthors(book) {
-      let authors = book.volumeInfo.authors;
+      let authors = book.volumeInfo.authors || [];
 
       if (authors.length < 3) {
-        authors = authors.join(' and ')
+        return authors.join(', ');
+      } else {
+        return authors.slice(0, 2).join(', ') + ' and others';
       }
-
-      else if (authors.length > 2) {
-        let lastAuthor = ' and ' + authors.slice(-1);
-
-        authors.pop()
-
-        authors = authors.join(', ')
-
-        authors += lastAuthor
-      }
-
-      return authors
     }
   }
 });
