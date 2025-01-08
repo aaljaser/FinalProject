@@ -1,122 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-
   <meta charset="UTF-8">
   <title>Book Finder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-<link rel="stylesheet" href="./style.css">
- 
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { height: 100%; background: rgb(185, 183, 175); }
+    svg { position: inherit; height: 20%; left: 5%; width: 15%; }
+    .top { list-style-type: none; position: fixed; top: 0; width: 100%; }
+  </style>
 </head>
-
-
- <style>* {
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-}
-
-body {
-  background: rgb(185, 183, 175);
-}
-
-svg {
-  position:inherit;
-  top: 0px;
-  height: 20%;
-  left: 5%;
-  width: 15%;}
-  .top {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-   
-    position: fixed;
-    top: 0;
-    width: 100%;
-  }
-  
-</style>
-
-
-<!--orbit-->
-<!-- partial -->
-  
-<!-- partial:index.partial.html -->
- 
-
-
-<!-- partial:index.partial.html -->
- 
-<div class="top">
-  <div style="  float:center;">
-  <svg viewBox="0 0 160 160" width="160" height="160">
-    <circle cx="80" cy="80" r="50" />
-    <g transform=" matrix(0.866, -0.5, 0.25, 0.433, 80, 80)">
-      <path d="M 0,70 A 65,70 0 0,0 65,0 5,5 0 0,1 75,0 75,70 0 0,1 0,70Z" fill="#FFF">
-        <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="1s" repeatCount="indefinite" />
-      </path>
-    </g>
-    <path d="M 50,0 A 50,50 0 0,0 -50,0Z" transform="matrix(0.866, -0.5, 0.5, 0.866, 80, 80)" />
-  </svg>
-</div>
-</div>
 <body>
- 
- <div id="app">
-
-
-  
- <main>
-
-  <form id="book-search" @submit.prevent="search" class="search-form">
-         
-    <label >   <span>  Search for a book </span>    <br>
-    </label>    
-   <input class="v" type="text" v-model:trim="searchTerm" placeholder="⌕ Type Author, book name, subject....">
-<br><br>  
-     <button class="pushable">
-      <span class="shadow"></span>
-      <span class="edge"></span>
-      <span class="front">
-     search
-      </span>
-    </button>
-  </form>
-
- 
-<br>
-  <form class="search-results">
-    <div class="search-result" v-for="book in searchResults.items">
-      <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" >
-      
-      <div class="search-result--info">
-        <div class="search-result--title">{{ book.volumeInfo.title }}</li>
-        
-        <div v-if="book.volumeInfo.authors" class="search-result--authors">
-          by {{ bookAuthors(book) }}
+  <div class="top">
+    <svg viewBox="0 0 160 160" width="160" height="160">
+      <circle cx="80" cy="80" r="50" />
+      <g transform="matrix(0.866, -0.5, 0.25, 0.433, 80, 80)">
+        <path d="M 0,70 A 65,70 0 0,0 65,0 5,5 0 0,1 75,0 75,70 0 0,1 0,70Z" fill="#FFF">
+          <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="1s" repeatCount="indefinite" />
+        </path>
+      </g>
+      <path d="M 50,0 A 50,50 0 0,0 -50,0Z" transform="matrix(0.866, -0.5, 0.5, 0.866, 80, 80)" />
+    </svg>
+  </div>
+  <div id="app">
+    <main>
+      <form id="book-search" @submit.prevent="search" class="search-form">
+        <label><span>Search for a book</span><br></label>
+        <input class="v" type="text" v-model:trim="searchTerm" placeholder="⌕ Type Author, book name, subject....">
+        <button class="pushable">
+          <span class="shadow"></span>
+          <span class="edge"></span>
+          <span class="front">search</span>
+        </button>
+      </form>
+      <form class="search-results">
+        <div class="search-result" v-for="book in searchResults.items">
+          <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'">
+          <div class="search-result--info">
+            <div class="search-result--title">{{ book.volumeInfo.title }}</div>
+            <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
+            <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
+              <span>Published </span>{{ book.volumeInfo.publishedDate }}
+            </div>
+          </div>
         </div>
-        
-        <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
-          <span>Published </span> {{ book.volumeInfo.publishedDate }}
-        </div>
-      </div>
-    </div>
-  </form>
-  
- 
-<!-- partial -->
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js'></script><script  src="./script.js"></script>
-
+      </form>
+    </main>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js'></script>
+    <script src="./script.js"></script>
+  </div>
+  <footer>
+    <p class="message">made by <span class="name">Abdulkareem Aljaser</span></p>
+    <p class="copyrights">Copyright 2019</p>
+  </footer>
 </body>
-<footer>
-  <p class="message"> made by <span class="name">Abdulkareem Aljaser</span></p>
-  <P class="copyrights">Copyright 2019</P>
-</footer>
 </html>
