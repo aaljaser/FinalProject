@@ -2,151 +2,141 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; background: rgb(185, 183, 175); font-family: Arial, sans-serif; }
-    #app { max-width: 800px; margin: 0 auto; padding: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: rgb(185, 183, 175);
+      margin: 0;
+      padding: 0;
+    }
+
+    #app {
+      text-align: center;
+      padding: 20px;
+    }
 
     .search-form {
-      display: flex;
-      justify-content: center;
-      align-items: center;
       margin-bottom: 20px;
     }
 
     .search-form input {
+      width: 80%;
       padding: 10px;
       font-size: 16px;
-      width: 70%;
-      margin-right: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
 
     .search-form button {
       padding: 10px 20px;
       font-size: 16px;
+      background-color: gray;
+      color: white;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
 
-    .swiper-container {
+    .swiper {
       width: 100%;
-      height: 400px;
+      max-width: 400px;
+      margin: 20px auto;
     }
 
     .swiper-slide {
+      text-align: center;
+      font-size: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .swiper-slide img {
-      max-width: 150px;
-      max-height: 200px;
-      margin-bottom: 15px;
+    .search-result--thumbnail {
+      width: 150px;
+      height: 200px;
+      object-fit: cover;
+      margin-bottom: 10px;
     }
 
-    .swiper-slide h2 {
-      font-size: 18px;
-      margin: 10px 0;
+    .search-result--title {
+      font-weight: bold;
+      margin-bottom: 5px;
     }
 
-    .swiper-slide p {
+    .search-result--authors {
+      color: gray;
+      margin-bottom: 5px;
+    }
+
+    .search-result--published {
       font-size: 14px;
-      color: #666;
+      color: #555;
     }
 
-    footer {
-      text-align: center;
+    .swiper-pagination {
       margin-top: 20px;
-      color: #333;
     }
-
-    footer p { margin: 5px 0; }
   </style>
 </head>
 <body>
   <div id="app">
-    <main>
-      <!-- Search Form -->
-      <form id="book-search" @submit.prevent="search" class="search-form">
-        <input type="text" v-model.trim="searchTerm" placeholder="Search by author, title, or subject...">
-        <button type="submit">Search</button>
-      </form>
+    <form id="book-search" @submit.prevent="search" class="search-form">
+      <label for="searchTerm">Search for a book</label><br>
+      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." />
+      <button type="submit">search</button>
+    </form>
 
-      <!-- Swiper Slider -->
-      <div v-if="searchResults.items.length" class="swiper-container">
+    <div v-if="searchResults.items && searchResults.items.length">
+      <div class="swiper">
         <div class="swiper-wrapper">
           <div class="swiper-slide" v-for="book in searchResults.items" :key="book.id">
-            <img :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover">
-            <h2>{{ book.volumeInfo.title }}</h2>
-            <p v-if="book.volumeInfo.authors">Author(s): {{ bookAuthors(book) }}</p>
-            <p v-if="book.volumeInfo.publishedDate">Published: {{ book.volumeInfo.publishedDate }}</p>
+            <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover" />
+            <div class="search-result--info">
+              <div class="search-result--title">{{ book.volumeInfo.title }}</div>
+              <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
+              <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
+                Published {{ book.volumeInfo.publishedDate }}
+              </div>
+            </div>
           </div>
         </div>
         <div class="swiper-pagination"></div>
       </div>
-
-      <!-- No Results Message -->
-      <p v-else>No books found. Try another search.</p>
-    </main>
+    </div>
   </div>
 
-  <footer>
-    <p>Made by <span>Abdulkareem Aljaser</span></p>
-    <p>&copy; 2025</p>
-  </footer>
-
-  <!-- Include Vue.js, Axios, and Swiper.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js"></script>
-  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-
-  <!-- Custom Script -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.js"></script>
   <script>
     new Vue({
-      el: '#app',
+      el: "#app",
       data: {
-        searchTerm: '',
-        searchResults: {
-          items: []
-        }
+        searchTerm: "",
+        searchResults: {}
       },
       methods: {
-        search() {
-          const query = this.searchTerm.trim();
-          if (!query) return;
+        async search() {
+          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}`;
+          const response = await axios.get(apiURL);
+          this.searchResults = response.data;
 
-          axios.get(`https://www.googleapis.com/books/v1/volumes?q=${query}`)
-            .then(response => {
-              this.searchResults = response.data;
-
-              // Initialize Swiper after data is rendered
-              this.$nextTick(() => {
-                new Swiper('.swiper-container', {
-                  direction: 'vertical',
-                  loop: true,
-                  pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true
-                  }
-                });
-              });
-            })
-            .catch(error => {
-              console.error('Error fetching books:', error);
+          // Initialize Swiper after the DOM updates
+          this.$nextTick(() => {
+            new Swiper(".swiper", {
+              direction: "vertical",
+              loop: true,
+              pagination: { el: ".swiper-pagination", clickable: true },
+              slidesPerView: 3,
+              spaceBetween: 10,
             });
+          });
         },
         bookAuthors(book) {
-          return book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown';
+          return book.volumeInfo.authors.join(", ");
         }
       }
     });
