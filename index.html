@@ -5,57 +5,151 @@
   <title>Book Finder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <style>
-    * { margin: 0; padding: 0; }
-    html, body { height: 100%; background: rgb(185, 183, 175); }
-    svg { position: inherit; height: 20%; left: 5%; width: 15%; }
-    .top { list-style-type: none; position: fixed; top: 0; width: 100%; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: rgb(185, 183, 175); font-family: Arial, sans-serif; }
+    #app { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+    .search-form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .search-form input {
+      padding: 10px;
+      font-size: 16px;
+      width: 70%;
+      margin-right: 10px;
+    }
+
+    .search-form button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .swiper-container {
+      width: 100%;
+      height: 400px;
+    }
+
+    .swiper-slide {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .swiper-slide img {
+      max-width: 150px;
+      max-height: 200px;
+      margin-bottom: 15px;
+    }
+
+    .swiper-slide h2 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .swiper-slide p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #333;
+    }
+
+    footer p { margin: 5px 0; }
   </style>
 </head>
 <body>
-  <div class="top">
-    <svg viewBox="0 0 160 160" width="160" height="160">
-      <circle cx="80" cy="80" r="50" />
-      <g transform="matrix(0.866, -0.5, 0.25, 0.433, 80, 80)">
-        <path d="M 0,70 A 65,70 0 0,0 65,0 5,5 0 0,1 75,0 75,70 0 0,1 0,70Z" fill="#FFF">
-          <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="1s" repeatCount="indefinite" />
-        </path>
-      </g>
-      <path d="M 50,0 A 50,50 0 0,0 -50,0Z" transform="matrix(0.866, -0.5, 0.5, 0.866, 80, 80)" />
-    </svg>
-  </div>
   <div id="app">
     <main>
+      <!-- Search Form -->
       <form id="book-search" @submit.prevent="search" class="search-form">
-        <label><span>Search for a book</span><br></label>
-        <input class="v" type="text" v-model:trim="searchTerm" placeholder="⌕ Type Author, book name, subject....">
-        <button class="pushable">
-          <span class="shadow"></span>
-          <span class="edge"></span>
-          <span class="front">search</span>
-        </button>
+        <input type="text" v-model.trim="searchTerm" placeholder="Search by author, title, or subject...">
+        <button type="submit">Search</button>
       </form>
-      <form class="search-results">
-        <div class="search-result" v-for="book in searchResults.items">
-          <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'">
-          <div class="search-result--info">
-            <div class="search-result--title">{{ book.volumeInfo.title }}</div>
-            <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
-            <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
-              <span>Published </span>{{ book.volumeInfo.publishedDate }}
-            </div>
+
+      <!-- Swiper Slider -->
+      <div v-if="searchResults.items.length" class="swiper-container">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide" v-for="book in searchResults.items" :key="book.id">
+            <img :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover">
+            <h2>{{ book.volumeInfo.title }}</h2>
+            <p v-if="book.volumeInfo.authors">Author(s): {{ bookAuthors(book) }}</p>
+            <p v-if="book.volumeInfo.publishedDate">Published: {{ book.volumeInfo.publishedDate }}</p>
           </div>
         </div>
-      </form>
+        <div class="swiper-pagination"></div>
+      </div>
+
+      <!-- No Results Message -->
+      <p v-else>No books found. Try another search.</p>
     </main>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js'></script>
-    <script src="./script.js"></script>
   </div>
+
   <footer>
-    <p class="message">made by <span class="name">Abdulkareem Aljaser</span></p>
-    <p class="copyrights">Copyright 2019</p>
+    <p>Made by <span>Abdulkareem Aljaser</span></p>
+    <p>&copy; 2025</p>
   </footer>
+
+  <!-- Include Vue.js, Axios, and Swiper.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js"></script>
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+  <!-- Custom Script -->
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        searchTerm: '',
+        searchResults: {
+          items: []
+        }
+      },
+      methods: {
+        search() {
+          const query = this.searchTerm.trim();
+          if (!query) return;
+
+          axios.get(`https://www.googleapis.com/books/v1/volumes?q=${query}`)
+            .then(response => {
+              this.searchResults = response.data;
+
+              // Initialize Swiper after data is rendered
+              this.$nextTick(() => {
+                new Swiper('.swiper-container', {
+                  direction: 'vertical',
+                  loop: true,
+                  pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true
+                  }
+                });
+              });
+            })
+            .catch(error => {
+              console.error('Error fetching books:', error);
+            });
+        },
+        bookAuthors(book) {
+          return book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown';
+        }
+      }
+    });
+  </script>
 </body>
 </html>
