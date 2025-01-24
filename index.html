@@ -83,6 +83,32 @@
     .swiper-pagination {
       margin-top: 20px;
     }
+
+    /* Responsive Layout for Mobile */
+    @media (max-width: 768px) {
+      .swiper {
+        height: 300px; /* Reduce height for mobile */
+      }
+
+      .search-result--thumbnail {
+        width: 80px;
+        height: 120px;
+      }
+
+      .search-form input {
+        width: 90%; /* Adjust search bar width for mobile */
+      }
+
+      .swiper-slide {
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Avoid overlapping */
+      }
+
+      .swiper-slide .search-result--info {
+        margin-top: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -137,8 +163,14 @@
                 el: ".swiper-pagination",
                 clickable: true,
               },
-              slidesPerView: 3, // Show 3 books per slide
-              spaceBetween: 20, // Space between slides
+              slidesPerView: 2, // Adjust number of slides per view for mobile
+              spaceBetween: 10, // Space between slides
+              breakpoints: {
+                768: {
+                  slidesPerView: 3, // Show 3 books per slide for larger screens
+                  spaceBetween: 20,
+                },
+              },
             });
           });
         },
