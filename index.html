@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: rgb(185, 183, 175);
+      background-color: #f4f4f4;
       margin: 0;
       padding: 0;
       display: flex;
@@ -29,8 +29,8 @@
     }
 
     .search-form input, .search-form select {
-      width: 80%;
-      padding: 10px;
+      width: calc(70% - 10px);
+      padding: 12px;
       font-size: 16px;
       margin-bottom: 10px;
       border-radius: 5px;
@@ -40,13 +40,14 @@
 
     .search-form input:focus, .search-form select:focus {
       outline: none;
-      border-color: gray;
+      border-color: #444;
     }
 
     .search-form button {
-      padding: 10px 20px;
+      padding: 12px 20px;
       font-size: 16px;
-      background-color: #444;
+      margin-left: 10px;
+      background-color: #007BFF;
       color: white;
       border: none;
       border-radius: 5px;
@@ -55,7 +56,7 @@
     }
 
     .search-form button:hover {
-      background-color: #666;
+      background-color: #0056b3;
     }
 
     .clear-filters {
@@ -68,9 +69,9 @@
     }
 
     .summary {
-      margin: 10px 0;
+      margin: 15px 0;
       font-size: 16px;
-      color: #333;
+      color: #555;
     }
 
     .swiper {
@@ -80,7 +81,7 @@
       margin: 20px auto;
       background: #fff;
       border-radius: 10px;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
       padding: 20px;
     }
 
@@ -93,31 +94,56 @@
     }
 
     .search-result--thumbnail {
-      width: 120px;
-      height: 180px;
+      width: 150px;
+      height: 200px;
       object-fit: cover;
       margin-bottom: 15px;
       border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .search-result--title {
       font-weight: bold;
+      font-size: 18px;
       margin-bottom: 5px;
       color: #333;
     }
 
     .search-result--authors {
-      color: gray;
+      color: #555;
       margin-bottom: 5px;
     }
 
     .search-result--published {
       font-size: 14px;
-      color: #555;
+      color: #777;
     }
 
-    .swiper-pagination {
-      margin-top: 10px;
+    .pagination-buttons {
+      margin: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .pagination-buttons button {
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .pagination-buttons button:hover {
+      background-color: #0056b3;
+    }
+
+    .pagination-buttons button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
 
     .spinner {
@@ -145,7 +171,7 @@
       font-size: 18px;
     }
 
-    /* Responsive Layout for Mobile */
+    /* Responsive Design */
     @media (max-width: 768px) {
       .swiper-slide {
         flex-direction: column;
@@ -154,7 +180,7 @@
       }
 
       .search-form input, .search-form select {
-        width: 90%;
+        width: calc(100% - 30px);
       }
     }
   </style>
@@ -166,22 +192,9 @@
       <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." aria-label="Search for a book" />
       
       <!-- Filters -->
-      <select v-model="filters.printType">
-        <option value="all">All Books</option>
-        <option value="books">Books Only</option>
-        <option value="magazines">Magazines Only</option>
-      </select>
-
       <select v-model="filters.orderBy">
         <option value="relevance">Sort by Relevance</option>
         <option value="newest">Sort by Newest</option>
-      </select>
-
-      <select v-model="filters.filter">
-        <option value="">All Content</option>
-        <option value="ebooks">eBooks Only</option>
-        <option value="free-ebooks">Free eBooks</option>
-        <option value="paid-ebooks">Paid eBooks</option>
       </select>
 
       <button type="submit">Search</button>
@@ -215,6 +228,12 @@
       </div>
     </div>
 
+    <!-- Pagination Buttons -->
+    <div class="pagination-buttons" v-if="!loading && totalResults > 0">
+      <button @click="prevPage" :disabled="currentPage <= 1">Previous</button>
+      <button @click="nextPage" :disabled="currentPage >= totalPages">Next</button>
+    </div>
+
     <!-- No Results -->
     <div v-else-if="!loading && searchResults.items && !searchResults.items.length" class="no-results">
       No results found. Try a different search.
@@ -241,21 +260,21 @@
         currentPage: 1,
         totalPages: 0,
         filters: {
-          printType: "all",
           orderBy: "relevance",
-          filter: ""
-        }
+        },
       },
       methods: {
-        async search() {
+        async search(page = 1) {
           this.loading = true;
           this.errorMessage = "";
-          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&maxResults=10&printType=${this.filters.printType}&orderBy=${this.filters.orderBy}&filter=${this.filters.filter}`;
+          const startIndex = (page - 1) * 10;
+          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&startIndex=${startIndex}&maxResults=10&orderBy=${this.filters.orderBy}`;
           try {
             const response = await axios.get(apiURL);
             this.searchResults = response.data;
             this.totalResults = response.data.totalItems || 0;
             this.totalPages = Math.ceil(this.totalResults / 10);
+            this.currentPage = page;
           } catch (error) {
             this.errorMessage = "Failed to fetch books. Please try again later.";
           } finally {
@@ -286,23 +305,25 @@
             });
           }
         },
+        nextPage() {
+          this.search(this.currentPage + 1);
+        },
+        prevPage() {
+          this.search(this.currentPage - 1);
+        },
         clearFilters() {
-          // Reset all filters and search term
           this.searchTerm = "";
-          this.filters = {
-            printType: "all",
-            orderBy: "relevance",
-            filter: ""
-          };
+          this.filters = { orderBy: "relevance" };
           this.searchResults = {};
           this.totalResults = 0;
+          this.currentPage = 1;
           this.totalPages = 0;
           this.errorMessage = "";
         },
         bookAuthors(book) {
           return book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown Author";
-        }
-      }
+        },
+      },
     });
   </script>
 </body>
