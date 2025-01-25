@@ -11,9 +11,15 @@
       background-color: rgb(185, 183, 175);
       margin: 0;
       padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
     #app {
+      width: 100%;
+      max-width: 1200px;
       text-align: center;
       padding: 20px;
     }
@@ -28,26 +34,38 @@
       font-size: 16px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-form input:focus {
+      outline: none;
+      border-color: gray;
     }
 
     .search-form button {
       padding: 10px 20px;
       font-size: 16px;
-      background-color: gray;
+      background-color: #444;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .search-form button:hover {
+      background-color: #666;
     }
 
     .swiper {
       width: 100%;
       max-width: 1000px;
-      height: 400px;
+      height: auto;
       margin: 20px auto;
       background: #fff;
       border-radius: 10px;
       box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
     }
 
     .swiper-slide {
@@ -63,11 +81,13 @@
       height: 180px;
       object-fit: cover;
       margin-bottom: 15px;
+      border-radius: 8px;
     }
 
     .search-result--title {
       font-weight: bold;
       margin-bottom: 5px;
+      color: #333;
     }
 
     .search-result--authors {
@@ -81,32 +101,29 @@
     }
 
     .swiper-pagination {
+      margin-top: 10px;
+    }
+
+    .no-results {
+      color: #555;
       margin-top: 20px;
+      font-size: 18px;
     }
 
     /* Responsive Layout for Mobile */
     @media (max-width: 768px) {
-      .swiper {
-        height: 300px; /* Reduce height for mobile */
-      }
-
-      .search-result--thumbnail {
-        width: 80px;
-        height: 120px;
-      }
-
-      .search-form input {
-        width: 90%; /* Adjust search bar width for mobile */
-      }
-
       .swiper-slide {
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start; /* Avoid overlapping */
+        justify-content: flex-start;
       }
 
       .swiper-slide .search-result--info {
         margin-top: 10px;
+      }
+
+      .search-form input {
+        width: 90%;
       }
     }
   </style>
@@ -115,7 +132,7 @@
   <div id="app">
     <form id="book-search" @submit.prevent="search" class="search-form">
       <label for="searchTerm">Search for a book</label><br>
-      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." />
+      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." aria-label="Search for a book" />
       <button type="submit">search</button>
     </form>
 
@@ -123,7 +140,11 @@
       <div class="swiper">
         <div class="swiper-wrapper">
           <div class="swiper-slide" v-for="book in searchResults.items" :key="book.id">
-            <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover" />
+            <img
+              class="search-result--thumbnail"
+              :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'"
+              alt="Book Cover"
+            />
             <div class="search-result--info">
               <div class="search-result--title">{{ book.volumeInfo.title }}</div>
               <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
@@ -135,6 +156,10 @@
         </div>
         <div class="swiper-pagination"></div>
       </div>
+    </div>
+
+    <div v-else-if="searchResults.items && !searchResults.items.length" class="no-results">
+      No results found. Try a different search.
     </div>
   </div>
 
@@ -151,28 +176,38 @@
       methods: {
         async search() {
           const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}`;
-          const response = await axios.get(apiURL);
-          this.searchResults = response.data;
+          try {
+            const response = await axios.get(apiURL);
+            this.searchResults = response.data;
 
-          // Initialize Swiper after DOM updates
-          this.$nextTick(() => {
-            new Swiper(".swiper", {
-              direction: "horizontal", // Horizontal slider
-              loop: true,
-              pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-              },
-              slidesPerView: 2, // Adjust number of slides per view for mobile
-              spaceBetween: 10, // Space between slides
-              breakpoints: {
-                768: {
-                  slidesPerView: 3, // Show 3 books per slide for larger screens
-                  spaceBetween: 20,
-                },
-              },
+            // Reinitialize Swiper only if results are found
+            this.$nextTick(() => {
+              if (this.searchResults.items && this.searchResults.items.length) {
+                new Swiper(".swiper", {
+                  direction: "horizontal",
+                  loop: true,
+                  pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                  },
+                  slidesPerView: 1,
+                  spaceBetween: 10,
+                  breakpoints: {
+                    768: {
+                      slidesPerView: 2,
+                      spaceBetween: 20,
+                    },
+                    1024: {
+                      slidesPerView: 3,
+                      spaceBetween: 30,
+                    },
+                  },
+                });
+              }
             });
-          });
+          } catch (error) {
+            console.error("Error fetching book data:", error);
+          }
         },
         bookAuthors(book) {
           return book.volumeInfo.authors.join(", ");
