@@ -28,16 +28,17 @@
       margin-bottom: 20px;
     }
 
-    .search-form input {
+    .search-form input, .search-form select {
       width: 80%;
       padding: 10px;
       font-size: 16px;
+      margin-bottom: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
       transition: border-color 0.3s ease;
     }
 
-    .search-form input:focus {
+    .search-form input:focus, .search-form select:focus {
       outline: none;
       border-color: gray;
     }
@@ -55,6 +56,21 @@
 
     .search-form button:hover {
       background-color: #666;
+    }
+
+    .clear-filters {
+      background-color: #b12e2e;
+      margin-left: 10px;
+    }
+
+    .clear-filters:hover {
+      background-color: #d94a4a;
+    }
+
+    .summary {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #333;
     }
 
     .swiper {
@@ -137,7 +153,7 @@
         justify-content: flex-start;
       }
 
-      .search-form input {
+      .search-form input, .search-form select {
         width: 90%;
       }
     }
@@ -148,8 +164,34 @@
     <form id="book-search" @submit.prevent="search" class="search-form">
       <label for="searchTerm">Search for a book</label><br>
       <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." aria-label="Search for a book" />
-      <button type="submit">search</button>
+      
+      <!-- Filters -->
+      <select v-model="filters.printType">
+        <option value="all">All Books</option>
+        <option value="books">Books Only</option>
+        <option value="magazines">Magazines Only</option>
+      </select>
+
+      <select v-model="filters.orderBy">
+        <option value="relevance">Sort by Relevance</option>
+        <option value="newest">Sort by Newest</option>
+      </select>
+
+      <select v-model="filters.filter">
+        <option value="">All Content</option>
+        <option value="ebooks">eBooks Only</option>
+        <option value="free-ebooks">Free eBooks</option>
+        <option value="paid-ebooks">Paid eBooks</option>
+      </select>
+
+      <button type="submit">Search</button>
+      <button type="button" class="clear-filters" @click="clearFilters">Clear Filters</button>
     </form>
+
+    <!-- Summary -->
+    <div v-if="!loading && totalResults > 0" class="summary">
+      {{ totalResults }} results found | Page {{ currentPage }} of {{ totalPages }}
+    </div>
 
     <!-- Spinner -->
     <div v-if="loading" class="spinner"></div>
@@ -170,11 +212,6 @@
           </div>
         </div>
         <div class="swiper-pagination"></div>
-      </div>
-      <!-- Pagination Controls -->
-      <div>
-        <button @click="prevPage" :disabled="!prevPageToken" class="search-form button">Previous</button>
-        <button @click="nextPage" :disabled="!nextPageToken" class="search-form button">Next</button>
       </div>
     </div>
 
@@ -200,19 +237,25 @@
         searchResults: {},
         loading: false,
         errorMessage: "",
-        nextPageToken: null,
-        prevPageToken: null
+        totalResults: 0,
+        currentPage: 1,
+        totalPages: 0,
+        filters: {
+          printType: "all",
+          orderBy: "relevance",
+          filter: ""
+        }
       },
       methods: {
-        async search(pageToken = null) {
+        async search() {
           this.loading = true;
           this.errorMessage = "";
-          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&maxResults=10${pageToken ? `&pageToken=${pageToken}` : ""}`;
+          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&maxResults=10&printType=${this.filters.printType}&orderBy=${this.filters.orderBy}&filter=${this.filters.filter}`;
           try {
             const response = await axios.get(apiURL);
             this.searchResults = response.data;
-            this.nextPageToken = response.data.nextPageToken || null;
-            this.prevPageToken = response.data.prevPageToken || null;
+            this.totalResults = response.data.totalItems || 0;
+            this.totalPages = Math.ceil(this.totalResults / 10);
           } catch (error) {
             this.errorMessage = "Failed to fetch books. Please try again later.";
           } finally {
@@ -243,11 +286,18 @@
             });
           }
         },
-        nextPage() {
-          this.search(this.nextPageToken);
-        },
-        prevPage() {
-          this.search(this.prevPageToken);
+        clearFilters() {
+          // Reset all filters and search term
+          this.searchTerm = "";
+          this.filters = {
+            printType: "all",
+            orderBy: "relevance",
+            filter: ""
+          };
+          this.searchResults = {};
+          this.totalResults = 0;
+          this.totalPages = 0;
+          this.errorMessage = "";
         },
         bookAuthors(book) {
           return book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown Author";
