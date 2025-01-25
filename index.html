@@ -265,9 +265,18 @@
         async search(page = 1) {
           this.loading = true;
           this.errorMessage = "";
+          
+          // Validate the search term
+          if (!this.searchTerm.trim()) {
+            this.errorMessage = "Please enter a valid search query.";
+            this.loading = false;
+            return;
+          }
+
           const startIndex = (page - 1) * 10;
-          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&startIndex=${startIndex}&maxResults=10&orderBy=${this.filters.orderBy}&key=${this.apiKey}`;
+          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm.trim())}&startIndex=${startIndex}&maxResults=10&orderBy=${this.filters.orderBy}&key=${this.apiKey}`;
           try {
+            console.log("API URL:", apiURL); // Debugging the request
             const response = await axios.get(apiURL);
             this.searchResults = response.data;
             this.totalResults = response.data.totalItems || 0;
@@ -284,30 +293,6 @@
             console.error("Error fetching books:", error);
           } finally {
             this.loading = false;
-            this.$nextTick(() => {
-              if (this.searchResults.items && this.searchResults.items.length) {
-                new Swiper(".swiper", {
-                  direction: "horizontal",
-                  loop: true,
-                  pagination: {
-                    el: ".swiper-pagination",
-                    clickable: true,
-                  },
-                  slidesPerView: 1,
-                  spaceBetween: 10,
-                  breakpoints: {
-                    768: {
-                      slidesPerView: 2,
-                      spaceBetween: 20,
-                    },
-                    1024: {
-                      slidesPerView: 3,
-                      spaceBetween: 30,
-                    },
-                  },
-                });
-              }
-            });
           }
         },
         nextPage() {
