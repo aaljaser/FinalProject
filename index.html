@@ -104,7 +104,26 @@
       margin-top: 10px;
     }
 
-    .no-results {
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border-left-color: #444;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .no-results, .error-message {
       color: #555;
       margin-top: 20px;
       font-size: 18px;
@@ -116,10 +135,6 @@
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-      }
-
-      .swiper-slide .search-result--info {
-        margin-top: 10px;
       }
 
       .search-form input {
@@ -136,15 +151,15 @@
       <button type="submit">search</button>
     </form>
 
-    <div v-if="searchResults.items && searchResults.items.length">
+    <!-- Spinner -->
+    <div v-if="loading" class="spinner"></div>
+
+    <!-- Results -->
+    <div v-if="!loading && searchResults.items && searchResults.items.length">
       <div class="swiper">
         <div class="swiper-wrapper">
           <div class="swiper-slide" v-for="book in searchResults.items" :key="book.id">
-            <img
-              class="search-result--thumbnail"
-              :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'"
-              alt="Book Cover"
-            />
+            <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover" />
             <div class="search-result--info">
               <div class="search-result--title">{{ book.volumeInfo.title }}</div>
               <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
@@ -156,10 +171,21 @@
         </div>
         <div class="swiper-pagination"></div>
       </div>
+      <!-- Pagination Controls -->
+      <div>
+        <button @click="prevPage" :disabled="!prevPageToken" class="search-form button">Previous</button>
+        <button @click="nextPage" :disabled="!nextPageToken" class="search-form button">Next</button>
+      </div>
     </div>
 
-    <div v-else-if="searchResults.items && !searchResults.items.length" class="no-results">
+    <!-- No Results -->
+    <div v-else-if="!loading && searchResults.items && !searchResults.items.length" class="no-results">
       No results found. Try a different search.
+    </div>
+
+    <!-- Error Message -->
+    <div v-if="errorMessage" class="error-message">
+      {{ errorMessage }}
     </div>
   </div>
 
@@ -171,16 +197,26 @@
       el: "#app",
       data: {
         searchTerm: "",
-        searchResults: {}
+        searchResults: {},
+        loading: false,
+        errorMessage: "",
+        nextPageToken: null,
+        prevPageToken: null
       },
       methods: {
-        async search() {
-          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}`;
+        async search(pageToken = null) {
+          this.loading = true;
+          this.errorMessage = "";
+          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&maxResults=10${pageToken ? `&pageToken=${pageToken}` : ""}`;
           try {
             const response = await axios.get(apiURL);
             this.searchResults = response.data;
-
-            // Reinitialize Swiper only if results are found
+            this.nextPageToken = response.data.nextPageToken || null;
+            this.prevPageToken = response.data.prevPageToken || null;
+          } catch (error) {
+            this.errorMessage = "Failed to fetch books. Please try again later.";
+          } finally {
+            this.loading = false;
             this.$nextTick(() => {
               if (this.searchResults.items && this.searchResults.items.length) {
                 new Swiper(".swiper", {
@@ -205,12 +241,16 @@
                 });
               }
             });
-          } catch (error) {
-            console.error("Error fetching book data:", error);
           }
         },
+        nextPage() {
+          this.search(this.nextPageToken);
+        },
+        prevPage() {
+          this.search(this.prevPageToken);
+        },
         bookAuthors(book) {
-          return book.volumeInfo.authors.join(", ");
+          return book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown Author";
         }
       }
     });
