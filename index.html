@@ -198,12 +198,15 @@
       <button type="button" class="clear-filters" @click="clearFilters">Clear Filters</button>
     </form>
 
+    <!-- Search Summary -->
     <div v-if="!loading && totalResults > 0" class="summary">
       {{ totalResults }} results found | Page {{ currentPage }} of {{ totalPages }}
     </div>
 
+    <!-- Spinner -->
     <div v-if="loading" class="spinner"></div>
 
+    <!-- Results -->
     <div v-if="!loading && searchResults.items && searchResults.items.length">
       <div class="swiper">
         <div class="swiper-wrapper">
@@ -222,15 +225,18 @@
       </div>
     </div>
 
+    <!-- Pagination Buttons -->
     <div class="pagination-buttons" v-if="!loading && totalResults > 0">
       <button @click="prevPage" :disabled="currentPage <= 1">Previous</button>
       <button @click="nextPage" :disabled="currentPage >= totalPages">Next</button>
     </div>
 
+    <!-- No Results -->
     <div v-else-if="!loading && searchResults.items && !searchResults.items.length" class="no-results">
       No results found. Try a different search.
     </div>
 
+    <!-- Error Message -->
     <div v-if="errorMessage" class="error-message">
       {{ errorMessage }}
     </div>
@@ -253,7 +259,7 @@
         filters: {
           orderBy: "relevance",
         },
-        apiKey: "YOUR_API_KEY", // Replace this with your actual Google Books API Key
+        apiKey: "AIzaSyDk0YE52eIvIeAe_s64Hy0Elpeativr1qw", // Your API key
       },
       methods: {
         async search(page = 1) {
