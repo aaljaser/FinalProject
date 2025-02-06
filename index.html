@@ -249,16 +249,25 @@
     new Vue({
       el: "#app",
       data: {
-        searchTerm: "",
-        searchResults: {},
-        loading: false,
-        errorMessage: "",
-        totalResults: 0,
-        currentPage: 1,
-        totalPages: 0,
-        filters: {
-          orderBy: "relevance",
-        },
+  activeSection: 'books',
+  portfolioProjects: [
+    {
+      title: "Book Search App",
+      description: "A Vue.js application that integrates with Google Books API to search and display book information.",
+      image: "https://via.placeholder.com/400x200",
+      demo: "#",
+      code: "#"
+    },
+    {
+      title: "E-Commerce Platform",
+      description: "Full-stack e-commerce solution with React and Node.js.",
+      image: "https://via.placeholder.com/400x200",
+      demo: "#",
+      code: "#"
+    }
+  ],
+  // ... existing data properties
+},
         apiKey: "AIzaSyDk0YE52eIvIeAe_s64Hy0Elpeativr1qw", // Your API key
       },
       methods: {
