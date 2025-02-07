@@ -6,95 +6,7 @@
   <title>Book Finder</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.css">
   <style>
-  
-  
-  /* Navigation Tabs */
-.nav-tabs {
-  margin-bottom: 30px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-.nav-tabs button {
-  padding: 12px 25px;
-  font-size: 16px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.nav-tabs button.active {
-  background-color: #0056b3;
-  transform: translateY(-2px);
-}
-
-/* Portfolio Section */
-.portfolio-section {
-  text-align: left;
-  padding: 20px;
-}
-
-.portfolio-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-top: 30px;
-}
-
-.portfolio-item {
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.portfolio-item:hover {
-  transform: translateY(-5px);
-}
-
-.portfolio-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.portfolio-content {
-  padding: 20px;
-}
-
-.portfolio-content h3 {
-  margin: 0 0 10px;
-  color: #333;
-}
-
-.portfolio-content p {
-  color: #666;
-  line-height: 1.6;
-}
-
-.portfolio-links {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-
-.portfolio-btn {
-  padding: 8px 15px;
-  background-color: #007BFF;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.portfolio-btn:hover {
-  background-color: #0056b3;
-}
+    /* General Styling */
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
@@ -113,6 +25,7 @@
       padding: 20px;
     }
 
+    /* Search Form */
     .search-form {
       margin-bottom: 20px;
     }
@@ -157,12 +70,7 @@
       background-color: #d94a4a;
     }
 
-    .summary {
-      margin: 15px 0;
-      font-size: 16px;
-      color: #555;
-    }
-
+    /* Search Results */
     .swiper {
       width: 100%;
       max-width: 1000px;
@@ -208,6 +116,26 @@
       color: #777;
     }
 
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border-left-color: #444;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Pagination */
     .pagination-buttons {
       margin: 20px;
       display: flex;
@@ -234,204 +162,79 @@
       background-color: #ccc;
       cursor: not-allowed;
     }
-
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border-left-color: #444;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .no-results, .error-message {
-      color: #555;
-      margin-top: 20px;
-      font-size: 18px;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .swiper-slide {
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-      }
-
-      .search-form input, .search-form select {
-        width: calc(100% - 30px);
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="nav-tabs">
-  <button @click="activeSection = 'books'" :class="{active: activeSection === 'books'}">Book Search</button>
-  <button @click="activeSection = 'portfolio'" :class="{active: activeSection === 'portfolio'}">My Portfolio</button>
-</div>
-<div v-if="activeSection === 'portfolio'" class="portfolio-section">
-  <h2>My Development Portfolio</h2>
-  <div class="portfolio-grid">
-    <div class="portfolio-item" v-for="(project, index) in portfolioProjects" :key="index">
-      <img :src="project.image" :alt="project.title + ' screenshot'" class="portfolio-image">
-      <div class="portfolio-content">
-        <h3>{{ project.title }}</h3>
-        <p>{{ project.description }}</p>
-        <div class="portfolio-links">
-          <a :href="project.demo" target="_blank" class="portfolio-btn">Live Demo</a>
-          <a :href="project.code" target="_blank" class="portfolio-btn">View Code</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
   <div id="app">
     <form id="book-search" @submit.prevent="search" class="search-form">
-      <label for="searchTerm">Search for a book</label><br>
-      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." aria-label="Search for a book" />
+      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." />
       <select v-model="filters.orderBy">
         <option value="relevance">Sort by Relevance</option>
         <option value="newest">Sort by Newest</option>
       </select>
       <button type="submit">Search</button>
-      <button type="button" class="clear-filters" @click="clearFilters">Clear Filters</button>
+      <button type="button" class="clear-filters" @click="clearFilters">Clear</button>
     </form>
 
-    <!-- Search Summary -->
-    <div v-if="!loading && totalResults > 0" class="summary">
-      {{ totalResults }} results found | Page {{ currentPage }} of {{ totalPages }}
-    </div>
-
-    <!-- Spinner -->
     <div v-if="loading" class="spinner"></div>
 
-    <!-- Results -->
     <div v-if="!loading && searchResults.items && searchResults.items.length">
       <div class="swiper">
         <div class="swiper-wrapper">
           <div class="swiper-slide" v-for="book in searchResults.items" :key="book.id">
-            <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover" />
-            <div class="search-result--info">
-              <div class="search-result--title">{{ book.volumeInfo.title }}</div>
-              <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
-              <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
-                Published {{ book.volumeInfo.publishedDate }}
-              </div>
-            </div>
+            <img class="search-result--thumbnail" :src="book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150x200'" alt="Book Cover" />
+            <div class="search-result--title">{{ book.volumeInfo.title }}</div>
+            <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
+            <div v-if="book.volumeInfo.publishedDate" class="search-result--published">Published {{ book.volumeInfo.publishedDate }}</div>
           </div>
         </div>
-        <div class="swiper-pagination"></div>
       </div>
     </div>
 
-    <!-- Pagination Buttons -->
     <div class="pagination-buttons" v-if="!loading && totalResults > 0">
       <button @click="prevPage" :disabled="currentPage <= 1">Previous</button>
       <button @click="nextPage" :disabled="currentPage >= totalPages">Next</button>
-    </div>
-
-    <!-- No Results -->
-    <div v-else-if="!loading && searchResults.items && !searchResults.items.length" class="no-results">
-      No results found. Try a different search.
-    </div>
-
-    <!-- Error Message -->
-    <div v-if="errorMessage" class="error-message">
-      {{ errorMessage }}
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.js"></script>
   <script>
     new Vue({
       el: "#app",
       data: {
-  activeSection: 'books',
-  portfolioProjects: [
-    {
-      title: "Book Search App",
-      description: "A Vue.js application that integrates with Google Books API to search and display book information.",
-      image: "https://via.placeholder.com/400x200",
-      demo: "#",
-      code: "#"
-    },
-    {
-      title: "E-Commerce Platform",
-      description: "Full-stack e-commerce solution with React and Node.js.",
-      image: "https://via.placeholder.com/400x200",
-      demo: "#",
-      code: "#"
-    }
-  ],
-  // ... existing data properties
-},
-        apiKey: "AIzaSyDk0YE52eIvIeAe_s64Hy0Elpeativr1qw", // Your API key
+        apiKey: "YOUR_GOOGLE_BOOKS_API_KEY",
+        searchTerm: "",
+        filters: { orderBy: "relevance" },
+        searchResults: {},
+        totalResults: 0,
+        currentPage: 1,
+        totalPages: 0,
+        loading: false,
+        errorMessage: "",
       },
       methods: {
         async search(page = 1) {
+          if (!this.searchTerm.trim()) return;
           this.loading = true;
-          this.errorMessage = "";
-          
-          // Validate the search term
-          if (!this.searchTerm.trim()) {
-            this.errorMessage = "Please enter a valid search query.";
-            this.loading = false;
-            return;
-          }
-
           const startIndex = (page - 1) * 10;
-          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm.trim())}&startIndex=${startIndex}&maxResults=10&orderBy=${this.filters.orderBy}&key=${this.apiKey}`;
           try {
-            console.log("API URL:", apiURL); // Debugging the request
-            const response = await axios.get(apiURL);
+            const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&startIndex=${startIndex}&maxResults=10&orderBy=${this.filters.orderBy}&key=${this.apiKey}`);
             this.searchResults = response.data;
             this.totalResults = response.data.totalItems || 0;
             this.totalPages = Math.ceil(this.totalResults / 10);
             this.currentPage = page;
           } catch (error) {
-            if (error.response && error.response.status === 403) {
-              this.errorMessage = "API quota exceeded. Please try again later.";
-            } else if (error.response && error.response.status === 400) {
-              this.errorMessage = "Invalid API request. Please check your search query.";
-            } else {
-              this.errorMessage = "Failed to fetch books. Please check your internet connection.";
-            }
             console.error("Error fetching books:", error);
           } finally {
             this.loading = false;
           }
         },
-        nextPage() {
-          this.search(this.currentPage + 1);
-        },
-        prevPage() {
-          this.search(this.currentPage - 1);
-        },
-        clearFilters() {
-          this.searchTerm = "";
-          this.filters = { orderBy: "relevance" };
-          this.searchResults = {};
-          this.totalResults = 0;
-          this.currentPage = 1;
-          this.totalPages = 0;
-          this.errorMessage = "";
-        },
-        bookAuthors(book) {
-          return book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown Author";
-        },
-      },
+        prevPage() { this.search(this.currentPage - 1); },
+        nextPage() { this.search(this.currentPage + 1); },
+        bookAuthors(book) { return book.volumeInfo.authors?.join(", ") || "Unknown"; },
+        clearFilters() { this.searchTerm = ""; this.searchResults = {}; }
+      }
     });
   </script>
 </body>
