@@ -6,10 +6,9 @@
   <title>Book Finder</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.css">
   <style>
-    /* General Styling */
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background-color: rgb(185, 183, 175);
       margin: 0;
       padding: 0;
       display: flex;
@@ -25,31 +24,28 @@
       padding: 20px;
     }
 
-    /* Search Form */
     .search-form {
       margin-bottom: 20px;
     }
 
-    .search-form input, .search-form select {
-      width: calc(70% - 10px);
-      padding: 12px;
+    .search-form input {
+      width: 80%;
+      padding: 10px;
       font-size: 16px;
-      margin-bottom: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
       transition: border-color 0.3s ease;
     }
 
-    .search-form input:focus, .search-form select:focus {
+    .search-form input:focus {
       outline: none;
-      border-color: #444;
+      border-color: gray;
     }
 
     .search-form button {
-      padding: 12px 20px;
+      padding: 10px 20px;
       font-size: 16px;
-      margin-left: 10px;
-      background-color: #007BFF;
+      background-color: #444;
       color: white;
       border: none;
       border-radius: 5px;
@@ -58,19 +54,9 @@
     }
 
     .search-form button:hover {
-      background-color: #0056b3;
+      background-color: #666;
     }
 
-    .clear-filters {
-      background-color: #b12e2e;
-      margin-left: 10px;
-    }
-
-    .clear-filters:hover {
-      background-color: #d94a4a;
-    }
-
-    /* Search Results */
     .swiper {
       width: 100%;
       max-width: 1000px;
@@ -78,7 +64,7 @@
       margin: 20px auto;
       background: #fff;
       border-radius: 10px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       padding: 20px;
     }
 
@@ -91,29 +77,31 @@
     }
 
     .search-result--thumbnail {
-      width: 150px;
-      height: 200px;
+      width: 120px;
+      height: 180px;
       object-fit: cover;
       margin-bottom: 15px;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .search-result--title {
       font-weight: bold;
-      font-size: 18px;
       margin-bottom: 5px;
       color: #333;
     }
 
     .search-result--authors {
-      color: #555;
+      color: gray;
       margin-bottom: 5px;
     }
 
     .search-result--published {
       font-size: 14px;
-      color: #777;
+      color: #555;
+    }
+
+    .swiper-pagination {
+      margin-top: 10px;
     }
 
     .spinner {
@@ -135,105 +123,135 @@
       }
     }
 
-    /* Pagination */
-    .pagination-buttons {
-      margin: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
+    .no-results, .error-message {
+      color: #555;
+      margin-top: 20px;
+      font-size: 18px;
     }
 
-    .pagination-buttons button {
-      padding: 10px 15px;
-      font-size: 16px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+    /* Responsive Layout for Mobile */
+    @media (max-width: 768px) {
+      .swiper-slide {
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+      }
 
-    .pagination-buttons button:hover {
-      background-color: #0056b3;
-    }
-
-    .pagination-buttons button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+      .search-form input {
+        width: 90%;
+      }
     }
   </style>
 </head>
 <body>
   <div id="app">
     <form id="book-search" @submit.prevent="search" class="search-form">
-      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." />
-      <select v-model="filters.orderBy">
-        <option value="relevance">Sort by Relevance</option>
-        <option value="newest">Sort by Newest</option>
-      </select>
-      <button type="submit">Search</button>
-      <button type="button" class="clear-filters" @click="clearFilters">Clear</button>
+      <label for="searchTerm">Search for a book</label><br>
+      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." aria-label="Search for a book" />
+      <button type="submit">search</button>
     </form>
 
+    <!-- Spinner -->
     <div v-if="loading" class="spinner"></div>
 
+    <!-- Results -->
     <div v-if="!loading && searchResults.items && searchResults.items.length">
       <div class="swiper">
         <div class="swiper-wrapper">
           <div class="swiper-slide" v-for="book in searchResults.items" :key="book.id">
-            <img class="search-result--thumbnail" :src="book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150x200'" alt="Book Cover" />
-            <div class="search-result--title">{{ book.volumeInfo.title }}</div>
-            <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
-            <div v-if="book.volumeInfo.publishedDate" class="search-result--published">Published {{ book.volumeInfo.publishedDate }}</div>
+            <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover" />
+            <div class="search-result--info">
+              <div class="search-result--title">{{ book.volumeInfo.title }}</div>
+              <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
+              <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
+                Published {{ book.volumeInfo.publishedDate }}
+              </div>
+            </div>
           </div>
         </div>
+        <div class="swiper-pagination"></div>
+      </div>
+      <!-- Pagination Controls -->
+      <div>
+        <button @click="prevPage" :disabled="!prevPageToken" class="search-form button">Previous</button>
+        <button @click="nextPage" :disabled="!nextPageToken" class="search-form button">Next</button>
       </div>
     </div>
 
-    <div class="pagination-buttons" v-if="!loading && totalResults > 0">
-      <button @click="prevPage" :disabled="currentPage <= 1">Previous</button>
-      <button @click="nextPage" :disabled="currentPage >= totalPages">Next</button>
+    <!-- No Results -->
+    <div v-else-if="!loading && searchResults.items && !searchResults.items.length" class="no-results">
+      No results found. Try a different search.
+    </div>
+
+    <!-- Error Message -->
+    <div v-if="errorMessage" class="error-message">
+      {{ errorMessage }}
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.js"></script>
   <script>
     new Vue({
       el: "#app",
       data: {
-        apiKey: "YOUR_GOOGLE_BOOKS_API_KEY",
         searchTerm: "",
-        filters: { orderBy: "relevance" },
         searchResults: {},
-        totalResults: 0,
-        currentPage: 1,
-        totalPages: 0,
         loading: false,
         errorMessage: "",
+        nextPageToken: null,
+        prevPageToken: null
       },
       methods: {
-        async search(page = 1) {
-          if (!this.searchTerm.trim()) return;
+        async search(pageToken = null) {
           this.loading = true;
-          const startIndex = (page - 1) * 10;
+          this.errorMessage = "";
+          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&maxResults=10${pageToken ? `&pageToken=${pageToken}` : ""}`;
           try {
-            const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&startIndex=${startIndex}&maxResults=10&orderBy=${this.filters.orderBy}&key=${this.apiKey}`);
+            const response = await axios.get(apiURL);
             this.searchResults = response.data;
-            this.totalResults = response.data.totalItems || 0;
-            this.totalPages = Math.ceil(this.totalResults / 10);
-            this.currentPage = page;
+            this.nextPageToken = response.data.nextPageToken || null;
+            this.prevPageToken = response.data.prevPageToken || null;
           } catch (error) {
-            console.error("Error fetching books:", error);
+            this.errorMessage = "Failed to fetch books. Please try again later.";
           } finally {
             this.loading = false;
+            this.$nextTick(() => {
+              if (this.searchResults.items && this.searchResults.items.length) {
+                new Swiper(".swiper", {
+                  direction: "horizontal",
+                  loop: true,
+                  pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                  },
+                  slidesPerView: 1,
+                  spaceBetween: 10,
+                  breakpoints: {
+                    768: {
+                      slidesPerView: 2,
+                      spaceBetween: 20,
+                    },
+                    1024: {
+                      slidesPerView: 3,
+                      spaceBetween: 30,
+                    },
+                  },
+                });
+              }
+            });
           }
         },
-        prevPage() { this.search(this.currentPage - 1); },
-        nextPage() { this.search(this.currentPage + 1); },
-        bookAuthors(book) { return book.volumeInfo.authors?.join(", ") || "Unknown"; },
-        clearFilters() { this.searchTerm = ""; this.searchResults = {}; }
+        nextPage() {
+          this.search(this.nextPageToken);
+        },
+        prevPage() {
+          this.search(this.prevPageToken);
+        },
+        bookAuthors(book) {
+          return book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown Author";
+        }
       }
     });
   </script>
