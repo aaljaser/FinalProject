@@ -6,98 +6,9 @@
   <title>Book Finder</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.css">
   <style>
-  
-  
-  /* Navigation Tabs */
-.nav-tabs {
-  margin-bottom: 30px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-.nav-tabs button {
-  padding: 12px 25px;
-  font-size: 16px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.nav-tabs button.active {
-  background-color: #0056b3;
-  transform: translateY(-2px);
-}
-
-/* Portfolio Section */
-.portfolio-section {
-  text-align: left;
-  padding: 20px;
-}
-
-.portfolio-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-top: 30px;
-}
-
-.portfolio-item {
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.portfolio-item:hover {
-  transform: translateY(-5px);
-}
-
-.portfolio-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.portfolio-content {
-  padding: 20px;
-}
-
-.portfolio-content h3 {
-  margin: 0 0 10px;
-  color: #333;
-}
-
-.portfolio-content p {
-  color: #666;
-  line-height: 1.6;
-}
-
-.portfolio-links {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-
-.portfolio-btn {
-  padding: 8px 15px;
-  background-color: #007BFF;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.portfolio-btn:hover {
-  background-color: #0056b3;
-}
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background-color: rgb(185, 183, 175);
       margin: 0;
       padding: 0;
       display: flex;
@@ -117,26 +28,24 @@
       margin-bottom: 20px;
     }
 
-    .search-form input, .search-form select {
-      width: calc(70% - 10px);
-      padding: 12px;
+    .search-form input {
+      width: 80%;
+      padding: 10px;
       font-size: 16px;
-      margin-bottom: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
       transition: border-color 0.3s ease;
     }
 
-    .search-form input:focus, .search-form select:focus {
+    .search-form input:focus {
       outline: none;
-      border-color: #444;
+      border-color: gray;
     }
 
     .search-form button {
-      padding: 12px 20px;
+      padding: 10px 20px;
       font-size: 16px;
-      margin-left: 10px;
-      background-color: #007BFF;
+      background-color: #444;
       color: white;
       border: none;
       border-radius: 5px;
@@ -145,22 +54,7 @@
     }
 
     .search-form button:hover {
-      background-color: #0056b3;
-    }
-
-    .clear-filters {
-      background-color: #b12e2e;
-      margin-left: 10px;
-    }
-
-    .clear-filters:hover {
-      background-color: #d94a4a;
-    }
-
-    .summary {
-      margin: 15px 0;
-      font-size: 16px;
-      color: #555;
+      background-color: #666;
     }
 
     .swiper {
@@ -170,7 +64,7 @@
       margin: 20px auto;
       background: #fff;
       border-radius: 10px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       padding: 20px;
     }
 
@@ -183,56 +77,31 @@
     }
 
     .search-result--thumbnail {
-      width: 150px;
-      height: 200px;
+      width: 120px;
+      height: 180px;
       object-fit: cover;
       margin-bottom: 15px;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .search-result--title {
       font-weight: bold;
-      font-size: 18px;
       margin-bottom: 5px;
       color: #333;
     }
 
     .search-result--authors {
-      color: #555;
+      color: gray;
       margin-bottom: 5px;
     }
 
     .search-result--published {
       font-size: 14px;
-      color: #777;
+      color: #555;
     }
 
-    .pagination-buttons {
-      margin: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .pagination-buttons button {
-      padding: 10px 15px;
-      font-size: 16px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .pagination-buttons button:hover {
-      background-color: #0056b3;
-    }
-
-    .pagination-buttons button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+    .swiper-pagination {
+      margin-top: 10px;
     }
 
     .spinner {
@@ -260,7 +129,7 @@
       font-size: 18px;
     }
 
-    /* Responsive Design */
+    /* Responsive Layout for Mobile */
     @media (max-width: 768px) {
       .swiper-slide {
         flex-direction: column;
@@ -268,49 +137,19 @@
         justify-content: flex-start;
       }
 
-      .search-form input, .search-form select {
-        width: calc(100% - 30px);
+      .search-form input {
+        width: 90%;
       }
     }
   </style>
 </head>
 <body>
-  <div class="nav-tabs">
-  <button @click="activeSection = 'books'" :class="{active: activeSection === 'books'}">Book Search</button>
-  <button @click="activeSection = 'portfolio'" :class="{active: activeSection === 'portfolio'}">My Portfolio</button>
-</div>
-<div v-if="activeSection === 'portfolio'" class="portfolio-section">
-  <h2>My Development Portfolio</h2>
-  <div class="portfolio-grid">
-    <div class="portfolio-item" v-for="(project, index) in portfolioProjects" :key="index">
-      <img :src="project.image" :alt="project.title + ' screenshot'" class="portfolio-image">
-      <div class="portfolio-content">
-        <h3>{{ project.title }}</h3>
-        <p>{{ project.description }}</p>
-        <div class="portfolio-links">
-          <a :href="project.demo" target="_blank" class="portfolio-btn">Live Demo</a>
-          <a :href="project.code" target="_blank" class="portfolio-btn">View Code</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
   <div id="app">
     <form id="book-search" @submit.prevent="search" class="search-form">
       <label for="searchTerm">Search for a book</label><br>
       <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." aria-label="Search for a book" />
-      <select v-model="filters.orderBy">
-        <option value="relevance">Sort by Relevance</option>
-        <option value="newest">Sort by Newest</option>
-      </select>
-      <button type="submit">Search</button>
-      <button type="button" class="clear-filters" @click="clearFilters">Clear Filters</button>
+      <button type="submit">search</button>
     </form>
-
-    <!-- Search Summary -->
-    <div v-if="!loading && totalResults > 0" class="summary">
-      {{ totalResults }} results found | Page {{ currentPage }} of {{ totalPages }}
-    </div>
 
     <!-- Spinner -->
     <div v-if="loading" class="spinner"></div>
@@ -332,12 +171,11 @@
         </div>
         <div class="swiper-pagination"></div>
       </div>
-    </div>
-
-    <!-- Pagination Buttons -->
-    <div class="pagination-buttons" v-if="!loading && totalResults > 0">
-      <button @click="prevPage" :disabled="currentPage <= 1">Previous</button>
-      <button @click="nextPage" :disabled="currentPage >= totalPages">Next</button>
+      <!-- Pagination Controls -->
+      <div>
+        <button @click="prevPage" :disabled="!prevPageToken" class="search-form button">Previous</button>
+        <button @click="nextPage" :disabled="!nextPageToken" class="search-form button">Next</button>
+      </div>
     </div>
 
     <!-- No Results -->
@@ -358,80 +196,63 @@
     new Vue({
       el: "#app",
       data: {
-  activeSection: 'books',
-  portfolioProjects: [
-    {
-      title: "Book Search App",
-      description: "A Vue.js application that integrates with Google Books API to search and display book information.",
-      image: "https://via.placeholder.com/400x200",
-      demo: "#",
-      code: "#"
-    },
-    {
-      title: "E-Commerce Platform",
-      description: "Full-stack e-commerce solution with React and Node.js.",
-      image: "https://via.placeholder.com/400x200",
-      demo: "#",
-      code: "#"
-    }
-  ],
-  // ... existing data properties
-},
-        apiKey: "AIzaSyDk0YE52eIvIeAe_s64Hy0Elpeativr1qw", // Your API key
+        searchTerm: "",
+        searchResults: {},
+        loading: false,
+        errorMessage: "",
+        nextPageToken: null,
+        prevPageToken: null
       },
       methods: {
-        async search(page = 1) {
+        async search(pageToken = null) {
           this.loading = true;
           this.errorMessage = "";
-          
-          // Validate the search term
-          if (!this.searchTerm.trim()) {
-            this.errorMessage = "Please enter a valid search query.";
-            this.loading = false;
-            return;
-          }
-
-          const startIndex = (page - 1) * 10;
-          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm.trim())}&startIndex=${startIndex}&maxResults=10&orderBy=${this.filters.orderBy}&key=${this.apiKey}`;
+          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&maxResults=10${pageToken ? `&pageToken=${pageToken}` : ""}`;
           try {
-            console.log("API URL:", apiURL); // Debugging the request
             const response = await axios.get(apiURL);
             this.searchResults = response.data;
-            this.totalResults = response.data.totalItems || 0;
-            this.totalPages = Math.ceil(this.totalResults / 10);
-            this.currentPage = page;
+            this.nextPageToken = response.data.nextPageToken || null;
+            this.prevPageToken = response.data.prevPageToken || null;
           } catch (error) {
-            if (error.response && error.response.status === 403) {
-              this.errorMessage = "API quota exceeded. Please try again later.";
-            } else if (error.response && error.response.status === 400) {
-              this.errorMessage = "Invalid API request. Please check your search query.";
-            } else {
-              this.errorMessage = "Failed to fetch books. Please check your internet connection.";
-            }
-            console.error("Error fetching books:", error);
+            this.errorMessage = "Failed to fetch books. Please try again later.";
           } finally {
             this.loading = false;
+            this.$nextTick(() => {
+              if (this.searchResults.items && this.searchResults.items.length) {
+                new Swiper(".swiper", {
+                  direction: "horizontal",
+                  loop: true,
+                  pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                  },
+                  slidesPerView: 1,
+                  spaceBetween: 10,
+                  breakpoints: {
+                    768: {
+                      slidesPerView: 2,
+                      spaceBetween: 20,
+                    },
+                    1024: {
+                      slidesPerView: 3,
+                      spaceBetween: 30,
+                    },
+                  },
+                });
+              }
+            });
           }
         },
         nextPage() {
-          this.search(this.currentPage + 1);
+          this.search(this.nextPageToken);
         },
         prevPage() {
-          this.search(this.currentPage - 1);
-        },
-        clearFilters() {
-          this.searchTerm = "";
-          this.filters = { orderBy: "relevance" };
-          this.searchResults = {};
-          this.totalResults = 0;
-          this.currentPage = 1;
-          this.totalPages = 0;
-          this.errorMessage = "";
+          this.search(this.prevPageToken);
         },
         bookAuthors(book) {
           return book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown Author";
-        },
-      },
+        }
+      }
     });
   </script>
 </body>
