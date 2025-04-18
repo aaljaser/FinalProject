@@ -2,255 +2,323 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Finder</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: rgb(185, 183, 175);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+    :root {
+      --primary-color: hsl(0deg 0% 0% / 0.25);
+      --secondary-color: rgb(185, 183, 175);
+      --background-color: white;
+      --box-shadow-color: rgba(0, 0, 0, 0.1);
+      --border-radius: 12px;
+      --transition-duration: 600ms;
+      --transition-timing-function: cubic-bezier(.3, .7, .4, 1);
     }
 
-    #app {
-      width: 100%;
-      max-width: 1200px;
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(-45deg, #ee7752, #4e786d, #396474, #101110bc);
+      background-size: 400% 400%;
+      animation: gradient 6s ease infinite;
       text-align: center;
-      padding: 20px;
+      font-family: 'Montserrat Alternates', sans-serif;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .top {
+      padding: 10px;
+      text-align: center;
+    }
+
+    svg {
+      width: 160px;
+      height: 160px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .v {
+      text-align: center;
+      border-radius: 7px;
+      padding: 8px;
+      width: 60%;
+      max-width: 360px;
+      margin: 10px auto;
+      display: block;
+      border: 1px solid #ccc;
+      font-size: 1.32em;
+      outline: none;
+    }
+
+    .v::placeholder {
+      color: #999;
+    }
+
+    .pushable {
+      justify-self: center;
+      position: relative;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      outline-offset: 4px;
+      transition: filter 250ms;
+    }
+
+    .shadow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      background: hsl(0deg 0% 0% / 0.25);
+      will-change: transform;
+      transform: translateY(2px);
+      transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+    }
+
+    .edge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      background: linear-gradient(to left, rgb(121, 121, 123) 0%, rgb(121, 121, 123) 8%, rgb(121, 121, 123) 92%, rgb(121, 121, 123) 100%);
+    }
+
+    .front {
+      display: block;
+      position: relative;
+      padding: 6px 16px;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      color: white;
+      background: rgb(138, 137, 141);
+      will-change: transform;
+      transform: translateY(-4px);
+      transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+    }
+
+    .pushable:hover {
+      filter: brightness(110%);
+    }
+
+    .pushable:hover .front {
+      transform: translateY(-6px);
+      transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+    }
+
+    .pushable:active .front {
+      transform: translateY(-2px);
+      transition: transform 34ms;
+    }
+
+    .pushable:hover .shadow {
+      transform: translateY(4px);
+      transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+    }
+
+    .pushable:active .shadow {
+      transform: translateY(1px);
+      transition: transform 34ms;
+    }
+
+    .pushable:focus:not(:focus-visible) {
+      outline: none;
     }
 
     .search-form {
-      margin-bottom: 20px;
-    }
-
-    .search-form input {
-      width: 80%;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      transition: border-color 0.3s ease;
-    }
-
-    .search-form input:focus {
-      outline: none;
-      border-color: gray;
-    }
-
-    .search-form button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #444;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .search-form button:hover {
-      background-color: #666;
-    }
-
-    .swiper {
-      width: 100%;
-      max-width: 1000px;
-      height: auto;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-    }
-
-    .swiper-slide {
+      margin-top: 20%;
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+    .search-results {
+      display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      text-align: center;
+      padding: 20px;
+    }
+
+    .search-result {
+      margin: 10px;
+      background-color: gainsboro;
+      border-radius: 0.25rem;
+      box-shadow: 0 1rem 1rem -0.75rem #dfc8c0;
+      padding: 10px;
+      width: 300px;
+      display: flex;
+      align-items: flex-start;
     }
 
     .search-result--thumbnail {
-      width: 120px;
-      height: 180px;
-      object-fit: cover;
-      margin-bottom: 15px;
-      border-radius: 8px;
+      width: 80px;
+      height: auto;
+      margin-right: 10px;
+    }
+
+    .search-result--info {
+      flex: 1;
+      text-align: left;
     }
 
     .search-result--title {
       font-weight: bold;
-      margin-bottom: 5px;
-      color: #333;
+      font-size: 1.1rem;
     }
 
     .search-result--authors {
-      color: gray;
-      margin-bottom: 5px;
+      font-size: 0.9rem;
+      color: #555;
     }
 
     .search-result--published {
-      font-size: 14px;
-      color: #555;
+      font-size: 0.8rem;
+      color: #777;
     }
 
-    .swiper-pagination {
-      margin-top: 10px;
+    .error {
+      color: red;
+      text-align: center;
+      margin: 20px;
     }
 
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border-left-color: #444;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
+    label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 5px;
     }
 
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .no-results, .error-message {
-      color: #555;
+    footer {
       margin-top: 20px;
-      font-size: 18px;
+      padding: 10px;
+      text-align: center;
+      color: #333;
     }
 
-    /* Responsive Layout for Mobile */
-    @media (max-width: 768px) {
-      .swiper-slide {
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-      }
+    .message, .copyrights {
+      font-size: 0.9rem;
+    }
 
-      .search-form input {
+    @media (max-width: 768px) {
+      .v {
         width: 90%;
+      }
+      .search-result {
+        width: 80%;
+      }
+      .search-form {
+        margin-top: 10%;
       }
     }
   </style>
 </head>
 <body>
+  <div class="top">
+    <svg viewBox="0 0 160 160" width="160" height="160">
+      <circle cx="80" cy="80" r="50" fill="#ccc" />
+      <g transform="matrix(0.866, -0.5, 0.25, 0.433, 80, 80)">
+        <path d="M 0,70 A 65,70 0 0,0 65,0 5,5 0 0,1 75,0 75,70 0 0,1 0,70Z" fill="#FFF">
+          <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="1s" repeatCount="indefinite" />
+        </path>
+      </g>
+      <path d="M 50,0 A 50,50 0 0,0 -50,0Z" transform="matrix(0.866, -0.5, 0.5, 0.866, 80, 80)" fill="#aaa" />
+    </svg>
+  </div>
+
   <div id="app">
-    <form id="book-search" @submit.prevent="search" class="search-form">
-      <label for="searchTerm">Search for a book</label><br>
-      <input type="text" id="searchTerm" v-model.trim="searchTerm" placeholder="Type Author, Book Title, or Subject..." aria-label="Search for a book" />
-      <button type="submit">search</button>
-    </form>
+    <main>
+      <form class="search-form" @submit.prevent="search">
+        <label for="search-input">Search for a book</label>
+        <input id="search-input" class="v" type="text" v-model.trim="searchTerm" placeholder="⌕ Type Author, book name, subject...">
+        <button class="pushable">
+          <span class="shadow"></span>
+          <span class="edge"></span>
+          <span class="front">Search</span>
+        </button>
+      </form>
 
-    <!-- Spinner -->
-    <div v-if="loading" class="spinner"></div>
-
-    <!-- Results -->
-    <div v-if="!loading && searchResults.items && searchResults.items.length">
-      <div class="swiper">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide" v-for="book in searchResults.items" :key="book.id">
-            <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book Cover" />
-            <div class="search-result--info">
-              <div class="search-result--title">{{ book.volumeInfo.title }}</div>
-              <div v-if="book.volumeInfo.authors" class="search-result--authors">by {{ bookAuthors(book) }}</div>
-              <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
-                Published {{ book.volumeInfo.publishedDate }}
-              </div>
+      <div class="search-results" v-if="searchResults.length">
+        <div class="search-result" v-for="book in searchResults" :key="book.id">
+          <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book cover">
+          <div class="search-result--info">
+            <div class="search-result--title">{{ book.volumeInfo.title }}</div>
+            <div v-if="book.volumeInfo.authors" class="search-result--authors">
+              by {{ bookAuthors(book) }}
+            </div>
+            <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
+              Published {{ book.volumeInfo.publishedDate }}
             </div>
           </div>
         </div>
-        <div class="swiper-pagination"></div>
       </div>
-      <!-- Pagination Controls -->
-      <div>
-        <button @click="prevPage" :disabled="!prevPageToken" class="search-form button">Previous</button>
-        <button @click="nextPage" :disabled="!nextPageToken" class="search-form button">Next</button>
-      </div>
-    </div>
-
-    <!-- No Results -->
-    <div v-else-if="!loading && searchResults.items && !searchResults.items.length" class="no-results">
-      No results found. Try a different search.
-    </div>
-
-    <!-- Error Message -->
-    <div v-if="errorMessage" class="error-message">
-      {{ errorMessage }}
-    </div>
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    </main>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.4.1/swiper-bundle.min.js"></script>
+  <footer>
+    <p class="message">Made by <span class="name">Abdulkareem Aljaser</span></p>
+    <p class="copyrights">Copyright 2019</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
   <script>
     new Vue({
-      el: "#app",
-      data: {
-        searchTerm: "",
-        searchResults: {},
-        loading: false,
-        errorMessage: "",
-        nextPageToken: null,
-        prevPageToken: null
+      el: '#app',
+      data() {
+        return {
+          searchTerm: '',
+          searchResults: [],
+          isLoading: false,
+          errorMessage: ''
+        };
       },
       methods: {
-        async search(pageToken = null) {
-          this.loading = true;
-          this.errorMessage = "";
-          const apiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}&maxResults=10${pageToken ? `&pageToken=${pageToken}` : ""}`;
-          try {
-            const response = await axios.get(apiURL);
-            this.searchResults = response.data;
-            this.nextPageToken = response.data.nextPageToken || null;
-            this.prevPageToken = response.data.prevPageToken || null;
-          } catch (error) {
-            this.errorMessage = "Failed to fetch books. Please try again later.";
-          } finally {
-            this.loading = false;
-            this.$nextTick(() => {
-              if (this.searchResults.items && this.searchResults.items.length) {
-                new Swiper(".swiper", {
-                  direction: "horizontal",
-                  loop: true,
-                  pagination: {
-                    el: ".swiper-pagination",
-                    clickable: true,
-                  },
-                  slidesPerView: 1,
-                  spaceBetween: 10,
-                  breakpoints: {
-                    768: {
-                      slidesPerView: 2,
-                      spaceBetween: 20,
-                    },
-                    1024: {
-                      slidesPerView: 3,
-                      spaceBetween: 30,
-                    },
-                  },
-                });
-              }
-            });
+        search: _.debounce(function() {
+          if (!this.searchTerm) {
+            this.searchResults = [];
+            this.errorMessage = '';
+            return;
           }
-        },
-        nextPage() {
-          this.search(this.nextPageToken);
-        },
-        prevPage() {
-          this.search(this.prevPageToken);
-        },
+
+          this.isLoading = true;
+          this.errorMessage = '';
+
+          axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}`)
+            .then(response => {
+              this.searchResults = response.data.items || [];
+            })
+            .catch(e => {
+              this.errorMessage = 'An error occurred while fetching the data.';
+              console.error(e);
+            })
+            .finally(() => {
+              this.isLoading = false;
+            });
+        }, 300),
         bookAuthors(book) {
-          return book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown Author";
+          let authors = book.volumeInfo.authors || [];
+          if (authors.length < 3) {
+            return authors.join(', ');
+          } else {
+            return authors.slice(0, 2).join(', ') + ' and others';
+          }
         }
       }
     });
