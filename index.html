@@ -1,327 +1,633 @@
-<!DOCTYPE html>
-<html lang="en">
+<script type="text/javascript">
+  var gk_isXlsx = false;
+  var gk_xlsxFileLookup = {};
+  var gk_fileData = {};
+  function filledCell(cell) {
+    return cell !== '' && cell != null;
+  }
+  function loadFileData(filename) {
+  if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+      try {
+          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
+
+          // Convert sheet to JSON to filter blank rows
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+          // Filter out blank rows (rows where all cells are empty, null, or undefined)
+          var filteredData = jsonData.filter(row => row.some(filledCell));
+
+          // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+          var headerRowIndex = filteredData.findIndex((row, index) =>
+            row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+          );
+          // Fallback
+          if (headerRowIndex === -1 || headerRowIndex > 25) {
+            headerRowIndex = 0;
+          }
+
+          // Convert filtered JSON back to CSV
+          var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+          return csv;
+      } catch (e) {
+          console.error(e);
+          return "";
+      }
+  }
+  return gk_fileData[filename] || "";
+  }
+  </script><!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>Book Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-  <style>
-    :root {
-      --primary-color: hsl(0deg 0% 0% / 0.25);
-      --secondary-color: rgb(185, 183, 175);
-      --background-color: white;
-      --box-shadow-color: rgba(0, 0, 0, 0.1);
-      --border-radius: 12px;
-      --transition-duration: 600ms;
-      --transition-timing-function: cubic-bezier(.3, .7, .4, 1);
-    }
+<meta charset="UTF-8">
+<title>البحث عن الكتب</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary-color: hsl(0deg 0% 0% / 0.25);
+--secondary-color: rgb(185, 183, 175);
+--background-color: white;
+--box-shadow-color: rgba(0, 0, 0, 0.1);
+--border-radius: 12px;
+--transition-duration: 600ms;
+--transition-timing-function: cubic-bezier(.3, .7, .4, 1);
+}
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
+html, body {
+height: 100%;
+margin: 0;
+padding: 0;
+font-family: 'Montserrat Alternates', sans-serif;
+}
 
-    body {
-      background: linear-gradient(-45deg, #ee7752, #4e786d, #396474, #101110bc);
-      background-size: 400% 400%;
-      animation: gradient 6s ease infinite;
-      text-align: center;
-      font-family: 'Montserrat Alternates', sans-serif;
-    }
+/* Splash Screen Styles */
+#splash-screen {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #2e4a4f;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+z-index: 2000;
+transition: opacity 1s ease;
+}
 
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+#splash-screen.hidden {
+opacity: 0;
+display: none;
+}
 
-    .top {
-      padding: 10px;
-      text-align: center;
-    }
+.logo {
+width: 100px;
+height: 100px;
+background: radial-gradient(circle, #ccc 50%, #fff 50%);
+border-radius: 50%;
+position: relative;
+margin-bottom: 20px;
+}
 
-    svg {
-      width: 160px;
-      height: 160px;
-      display: block;
-      margin: 0 auto;
-    }
+.logo::after {
+content: '';
+position: absolute;
+top: 10%;
+right: 10%;
+width: 20px;
+height: 20px;
+background: #2e4a4f;
+border-radius: 50%;
+}
 
-    .v {
-      text-align: center;
-      border-radius: 7px;
-      padding: 8px;
-      width: 60%;
-      max-width: 360px;
-      margin: 10px auto;
-      display: block;
-      border: 1px solid #ccc;
-      font-size: 1.32em;
-      outline: none;
-    }
+.credits {
+text-align: center;
+color: #fff;
+}
 
-    .v::placeholder {
-      color: #999;
-    }
+/* Story Overlay Styles */
+#story-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.8);
+display: none;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+z-index: 1000;
+overflow-y: auto;
+padding: 20px;
+transition: opacity 1s ease;
+}
 
-    .pushable {
-      justify-self: center;
-      position: relative;
-      border: none;
-      background: transparent;
-      padding: 0;
-      cursor: pointer;
-      outline-offset: 4px;
-      transition: filter 250ms;
-    }
+#story-overlay.active {
+display: flex;
+}
 
-    .shadow {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 12px;
-      background: hsl(0deg 0% 0% / 0.25);
-      will-change: transform;
-      transform: translateY(2px);
-      transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
-    }
+#story-overlay.hidden {
+opacity: 0;
+display: none;
+}
 
-    .edge {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 12px;
-      background: linear-gradient(to left, rgb(121, 121, 123) 0%, rgb(121, 121, 123) 8%, rgb(121, 121, 123) 92%, rgb(121, 121, 123) 100%);
-    }
+#story-text {
+font-size: 1.2em;
+color: #fff;
+max-width: 800px;
+margin: 0 20px;
+font-family: 'Montserrat Alternates', sans-serif;
+direction: rtl;
+line-height: 1.6;
+}
 
-    .front {
-      display: block;
-      position: relative;
-      padding: 6px 16px;
-      border-radius: 12px;
-      font-size: 1.25rem;
-      color: white;
-      background: rgb(138, 137, 141);
-      will-change: transform;
-      transform: translateY(-4px);
-      transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
-    }
+#continue-btn, #skip-btn {
+margin-top: 20px;
+padding: 10px 20px;
+font-size: 1em;
+background: #007bff;
+border: none;
+color: white;
+cursor: pointer;
+border-radius: 5px;
+font-family: 'Montserrat Alternates', sans-serif;
+}
 
-    .pushable:hover {
-      filter: brightness(110%);
-    }
+#continue-btn:hover, #skip-btn:hover {
+background: #0056b3;
+}
 
-    .pushable:hover .front {
-      transform: translateY(-6px);
-      transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
-    }
+#skip-btn {
+position: absolute;
+top: 20px;
+left: 20px;
+background: transparent;
+}
 
-    .pushable:active .front {
-      transform: translateY(-2px);
-      transition: transform 34ms;
-    }
+/* Main App Styles */
+#main-content {
+display: none;
+height: 100%;
+background: linear-gradient(-45deg, #ee7752, #4e786d, #396474, #101110bc);
+background-size: 400% 400%;
+animation: gradient 6s ease infinite;
+}
 
-    .pushable:hover .shadow {
-      transform: translateY(4px);
-      transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
-    }
+#main-content.active {
+display: block;
+}
 
-    .pushable:active .shadow {
-      transform: translateY(1px);
-      transition: transform 34ms;
-    }
+@keyframes gradient {
+0% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+100% { background-position: 0% 50%; }
+}
 
-    .pushable:focus:not(:focus-visible) {
-      outline: none;
-    }
+.top {
+padding: 10px;
+text-align: center;
+}
 
-    .search-form {
-      margin-top: 20%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+svg {
+width: 160px;
+height: 160px;
+display: block;
+margin: 0 auto;
+}
 
-    .search-results {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 20px;
-    }
+.v {
+text-align: center;
+border-radius: 7px;
+padding: 8px;
+width: 60%;
+max-width: 360px;
+margin: 10px auto;
+display: block;
+border: 1px solid #ccc;
+font-size: 1.32em;
+outline: none;
+}
 
-    .search-result {
-      margin: 10px;
-      background-color: gainsboro;
-      border-radius: 0.25rem;
-      box-shadow: 0 1rem 1rem -0.75rem #dfc8c0;
-      padding: 10px;
-      width: 300px;
-      display: flex;
-      align-items: flex-start;
-    }
+.v::placeholder {
+color: #999;
+}
 
-    .search-result--thumbnail {
-      width: 80px;
-      height: auto;
-      margin-right: 10px;
-    }
+.pushable {
+justify-self: center;
+position: relative;
+border: none;
+background: transparent;
+padding: 0;
+cursor: pointer;
+outline-offset: 4px;
+transition: filter 250ms;
+}
 
-    .search-result--info {
-      flex: 1;
-      text-align: left;
-    }
+.shadow {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+border-radius: 12px;
+background: hsl(0deg 0% 0% / 0.25);
+will-change: transform;
+transform: translateY(2px);
+transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+}
 
-    .search-result--title {
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
+.edge {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+border-radius: 12px;
+background: linear-gradient(to left, rgb(121, 121, 123) 0%, rgb(121, 121, 123) 8%, rgb(121, 121, 123) 92%, rgb(121, 121, 123) 100%);
+}
 
-    .search-result--authors {
-      font-size: 0.9rem;
-      color: #555;
-    }
+.front {
+display: block;
+position: relative;
+padding: 6px 16px;
+border-radius: 12px;
+font-size: 1.25rem;
+color: white;
+background: rgb(138, 137, 141);
+will-change: transform;
+transform: translateY(-4px);
+transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+}
 
-    .search-result--published {
-      font-size: 0.8rem;
-      color: #777;
-    }
+.pushable:hover {
+filter: brightness(110%);
+}
 
-    .error {
-      color: red;
-      text-align: center;
-      margin: 20px;
-    }
+.pushable:hover .front {
+transform: translateY(-6px);
+transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
 
-    label {
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
+.pushable:active .front {
+transform: translateY(-2px);
+transition: transform 34ms;
+}
 
-    footer {
-      margin-top: 20px;
-      padding: 10px;
-      text-align: center;
-      color: #333;
-    }
+.pushable:hover .shadow {
+transform: translateY(4px);
+transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
 
-    .message, .copyrights {
-      font-size: 0.9rem;
-    }
+.pushable:active .shadow {
+transform: translateY(1px);
+transition: transform 34ms;
+}
 
-    @media (max-width: 768px) {
-      .v {
-        width: 90%;
-      }
-      .search-result {
-        width: 80%;
-      }
-      .search-form {
-        margin-top: 10%;
-      }
-    }
-  </style>
+.pushable:focus:not(:focus-visible) {
+outline: none;
+}
+
+.search-form {
+margin-top: 20%;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.search-results {
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+padding: 20px;
+}
+
+.search-result {
+margin: 10px;
+background-color: gainsboro;
+border-radius: 0.25rem;
+box-shadow: 0 1rem 1rem -0.75rem #dfc8c0;
+padding: 10px;
+width: 300px;
+display: flex;
+align-items: flex-start;
+}
+
+.search-result--thumbnail {
+width: 80px;
+height: auto;
+margin-right: 10px;
+}
+
+.search-result--info {
+flex: 1;
+text-align: right;
+}
+
+.search-result--title {
+font-weight: bold;
+font-size: 1.1rem;
+}
+
+.search-result--authors {
+font-size: 0.9rem;
+color: #555;
+}
+
+.search-result--published {
+font-size: 0.8rem;
+color: #777;
+}
+
+.error {
+color: red;
+text-align: center;
+margin: 20px;
+}
+
+label {
+font-size: 0.9rem;
+font-weight: bold;
+margin-bottom: 5px;
+}
+
+footer {
+margin-top: 20px;
+padding: 10px;
+text-align: center;
+color: #333;
+}
+
+.message, .copyrights {
+font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+.v {
+  width: 90%;
+}
+.search-result {
+  width: 80%;
+}
+.search-form {
+  margin-top: 10%;
+}
+#story-text {
+  font-size: 1em;
+}
+}
+</style>
 </head>
 <body>
-  <div class="top">
-    <svg viewBox="0 0 160 160" width="160" height="160">
-      <circle cx="80" cy="80" r="50" fill="#ccc" />
-      <g transform="matrix(0.866, -0.5, 0.25, 0.433, 80, 80)">
-        <path d="M 0,70 A 65,70 0 0,0 65,0 5,5 0 0,1 75,0 75,70 0 0,1 0,70Z" fill="#FFF">
-          <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="1s" repeatCount="indefinite" />
-        </path>
-      </g>
-      <path d="M 50,0 A 50,50 0 0,0 -50,0Z" transform="matrix(0.866, -0.5, 0.5, 0.866, 80, 80)" fill="#aaa" />
-    </svg>
-  </div>
+<!-- Splash Screen -->
+<div id="splash-screen">
+<div class="logo"></div>
+<div class="credits">
+<p>صنع بواسطة عبدالكريم الجاسر</p>
+<p>حقوق النشر 2019</p>
+</div>
+</div>
 
-  <div id="app">
-    <main>
-      <form class="search-form" @submit.prevent="search">
-        <label for="search-input">Search for a book</label>
-        <input id="search-input" class="v" type="text" v-model.trim="searchTerm" placeholder="⌕ Type Author, book name, subject...">
-        <button class="pushable">
-          <span class="shadow"></span>
-          <span class="edge"></span>
-          <span class="front">Search</span>
-        </button>
-      </form>
+<!-- Story Overlay -->
+<div id="story-overlay">
+<button id="skip-btn" onclick="endStory()">تخطي</button>
+<div id="story-text"></div>
+<button id="continue-btn" onclick="endStory()">ابحث عن كتابك</button>
+</div>
 
-      <div class="search-results" v-if="searchResults.length">
-        <div class="search-result" v-for="book in searchResults" :key="book.id">
-          <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="Book cover">
-          <div class="search-result--info">
-            <div class="search-result--title">{{ book.volumeInfo.title }}</div>
-            <div v-if="book.volumeInfo.authors" class="search-result--authors">
-              by {{ bookAuthors(book) }}
-            </div>
-            <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
-              Published {{ book.volumeInfo.publishedDate }}
-            </div>
-          </div>
+<!-- Main App Content -->
+<div id="main-content">
+<div class="top">
+<svg viewBox="0 0 160 160" width="160" height="160">
+  <circle cx="80" cy="80" r="50" fill="#ccc" />
+  <g transform="matrix(0.866, -0.5, 0.25, 0.433, 80, 80)">
+    <path d="M 0,70 A 65,70 0 0,0 65,0 5,5 0 0,1 75,0 75,70 0 0,1 0,70Z" fill="#FFF">
+      <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="1s" repeatCount="indefinite" />
+    </path>
+  </g>
+  <path d="M 50,0 A 50,50 0 0,0 -50,0Z" transform="matrix(0.866, -0.5, 0.5, 0.866, 80, 80)" fill="#aaa" />
+</svg>
+</div>
+
+<div id="app">
+<main>
+  <form class="search-form" @submit.prevent="search">
+    <label for="search-input">ابحث عن كتاب</label>
+    <input id="search-input" class="v" type="text" v-model.trim="searchTerm" placeholder="⌕ اكتب اسم المؤلف، الكتاب، أو الموضوع...">
+    <button class="pushable">
+      <span class="shadow"></span>
+      <span class="edge"></span>
+      <span class="front">بحث</span>
+    </button>
+  </form>
+
+  <div class="search-results" v-if="searchResults.length">
+    <div class="search-result" v-for="book in searchResults" :key="book.id">
+      <img class="search-result--thumbnail" :src="'http://books.google.com/books/content?id=' + book.id + '&printsec=frontcover&img=1&zoom=1&source=gbs_api'" alt="غلاف الكتاب">
+      <div class="search-result--info">
+        <div class="search-result--title">{{ book.volumeInfo.title }}</div>
+        <div v-if="book.volumeInfo.authors" class="search-result--authors">
+          بقلم {{ bookAuthors(book) }}
+        </div>
+        <div v-if="book.volumeInfo.publishedDate" class="search-result--published">
+          نُشر في {{ book.volumeInfo.publishedDate }}
         </div>
       </div>
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-    </main>
+    </div>
   </div>
+  <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+</main>
+</div>
 
-  <footer>
-    <p class="message">Made by <span class="name">Abdulkareem Aljaser</span></p>
-    <p class="copyrights">Copyright 2019</p>
-  </footer>
+<footer>
+<p class="message">صنع بواسطة <span class="name">عبدالكريم الجاسر</span></p>
+<p class="copyrights">حقوق النشر 2019</p>
+</footer>
+</div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
-  <script>
-    new Vue({
-      el: '#app',
-      data() {
-        return {
-          searchTerm: '',
-          searchResults: [],
-          isLoading: false,
-          errorMessage: ''
-        };
-      },
-      methods: {
-        search: _.debounce(function() {
-          if (!this.searchTerm) {
-            this.searchResults = [];
-            this.errorMessage = '';
-            return;
-          }
+<script>
+// Story Logic
+console.log('بدء تهيئة الصفحة...');
+const storyText = [
+"يُعدّ الحسن بن الهيثم (965-1040م)، المعروف في الغرب باسم 'Alhazen'، أحد أعظم العلماء في التاريخ، ورائدًا في علم البصريات والمنهج العلمي.",
+"وُلد في البصرة وأمضى حياته في بغداد والقاهرة، حيث أنتج إسهامات غيرت مسار العلوم.",
+"يُشار إليه غالبًا بـ'أبو البصريات' بفضل كتابه الشهير 'كتاب المناظر'، الذي وضع أسس علم البصريات الحديث.",
+"في 'كتاب المناظر'، أثبت ابن الهيثم أن الضوء يسير في خطوط مستقيمة، وشرح كيفية انعكاسه وانكساره.",
+"كما قدم تفسيرًا علميًا للرؤية، مؤكدًا أن العين تتلقى الضوء من الأشياء، وليس العكس كما كان شائعًا في عصره.",
+"هذه الفكرة مهدت لاختراع العدسات والكاميرا المظلمة.",
+"كان ابن الهيثم رائدًا في استخدام التجربة والملاحظة للوصول إلى الحقائق، مما جعله رمزًا للمنهج العلمي.",
+"قوله الشهير: 'من طلب الحقيقة فليبدأ بالشك' يعكس نهجه النقدي.",
+"قدم إسهامات في الهندسة، حيث حلّ مشكلة تُعرف اليوم بـ'مسألة ابن الهيثم'، وساهم في تحسين فهمنا للحركة السماوية.",
+"عند مقارنة ابن الهيثم بعلماء الغرب (باستثناء نيكولا تيسلا)، نجد أوجه تشابه واختلاف مع شخصيات مثل غاليليو غاليلي وإسحاق نيوتن.",
+"يُعتبر غاليليو من رواد المنهج العلمي في أوروبا، لكن ابن الهيثم سبقه بقرون في الاعتماد على التجربة.",
+"بينما ركز غاليليو على الفلك وتحسين التلسكوب، كان تركيز ابن الهيثم على البصريات أكثر شمولية، حيث وضع أسسًا نظرية وعملية استفاد منها لاحقًا علماء مثل غاليليو نفسه.",
+"نيوتن طوّر قوانين الحركة والبصريات، لكن كتاب المناظر لابن الهيثم كان مرجعًا أساسيًا لأعمال نيوتن في دراسة الضوء.",
+"فكرة تحليل الضوء إلى ألوان الطيف التي اشتهر بها نيوتن استلهمت جزئيًا من أفكار ابن الهيثم حول انكسار الضوء.",
+"كيبلر طوّر قوانين حركة الكواكب وأسهم في البصريات، لكنه استفاد بشكل مباشر من أعمال ابن الهيثم في فهم آليات الرؤية وانكسار الضوء، مما ساعده في تطوير نظرياته حول العدسات.",
+"بينما حظي علماء الغرب مثل نيوتن وغاليليو بتقدير واسع في عصر النهضة الأوروبية، كان تأثير ابن الهيثم أقل شهرة في الغرب حتى تُرجم كتابه 'المناظر' في القرن الثالث عشر.",
+"هذا الكتاب ألهم علماء النهضة وأثر في تطور العلم الأوروبي.",
+"ما يميز ابن الهيثم هو قدرته على دمج الفلسفة والرياضيات والتجربة في وقت مبكر جدًا، مما جعله سابقًا لعصره.",
+"ابن الهيثم ليس مجرد عالم إسلامي، بل شخصية عالمية وضعت حجر الأساس لعلوم البصريات والمنهج العلمي.",
+"مقارنة بعلماء الغرب، نجد أنه لم يكن مجرد سابق لهم، بل كان مصدر إلهام لأعمالهم.",
+"إرثه يذكّرنا بأهمية التواصل العلمي عبر الحضارات، حيث شكّل أفكاره جسرًا بين العصور الوسطى والحداثة.",
+"الآن، ابحث عن كتابك واكتشف قصص المعرفة."
+];
 
-          this.isLoading = true;
+const splashScreen = document.getElementById('splash-screen');
+const storyOverlay = document.getElementById('story-overlay');
+const storyElement = document.getElementById('story-text');
+const continueButton = document.getElementById('continue-btn');
+const mainContent = document.getElementById('main-content');
+
+async function typeStory() {
+try {
+  console.log('جارٍ كتابة القصة...');
+  storyOverlay.classList.add('active');
+  for (let line of storyText) {
+    await typeLine(line);
+    await wait(1500);
+  }
+  continueButton.style.display = 'block';
+  console.log('اكتملت القصة، إظهار زر المتابعة');
+} catch (error) {
+  console.error('خطأ في القصة:', error);
+  endStory();
+}
+}
+
+async function typeLine(text) {
+storyElement.textContent = '';
+for (let char of text) {
+  storyElement.textContent += char;
+  await wait(30);
+}
+}
+
+function wait(ms) {
+return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function endStory() {
+console.log('إنهاء القصة، إظهار التطبيق');
+if (storyOverlay) {
+  storyOverlay.classList.add('hidden');
+  setTimeout(() => {
+    storyOverlay.style.display = 'none';
+    mainContent.classList.add('active');
+  }, 1000);
+} else {
+  console.warn('غطاء القصة غير موجود، إظهار التطبيق');
+  mainContent.classList.add('active');
+}
+}
+
+// إخفاء شاشة التحميل وبدء القصة
+window.addEventListener('load', () => {
+console.log('تم تحميل الصفحة');
+setTimeout(() => {
+  if (splashScreen) {
+    splashScreen.classList.add('hidden');
+    setTimeout(() => {
+      splashScreen.style.display = 'none';
+      if (storyElement && storyOverlay && continueButton) {
+        typeStory();
+      } else {
+        console.error('عناصر القصة مفقودة، إظهار التطبيق');
+        endStory();
+      }
+    }, 1000);
+  } else {
+    console.warn('شاشة التحميل غير موجودة، بدء القصة');
+    typeStory();
+  }
+}, 3000); // عرض شاشة التحميل لمدة 3 ثوانٍ
+});
+
+// تحميل المكتبات وتهيئة Vue
+function loadScripts() {
+const scripts = [
+  'https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.4/vue.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js'
+];
+scripts.forEach(src => {
+  const script = document.createElement('script');
+  script.src = src;
+  script.async = true;
+  script.onerror = () => {
+    console.error(`فشل تحميل ${src}`);
+    endStory(); // إظهار التطبيق إذا فشل تحميل المكتبات
+  };
+  document.head.appendChild(script);
+});
+}
+
+function initVue() {
+try {
+  console.log('جارٍ تهيئة Vue...');
+  new Vue({
+    el: '#app',
+    data() {
+      return {
+        searchTerm: '',
+        searchResults: [],
+        isLoading: false,
+        errorMessage: ''
+      };
+    },
+    methods: {
+      search: _.debounce(function() {
+        if (!this.searchTerm) {
+          this.searchResults = [];
           this.errorMessage = '';
-
-          axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}`)
-            .then(response => {
-              this.searchResults = response.data.items || [];
-            })
-            .catch(e => {
-              this.errorMessage = 'An error occurred while fetching the data.';
-              console.error(e);
-            })
-            .finally(() => {
-              this.isLoading = false;
-            });
-        }, 300),
-        bookAuthors(book) {
-          let authors = book.volumeInfo.authors || [];
-          if (authors.length < 3) {
-            return authors.join(', ');
-          } else {
-            return authors.slice(0, 2).join(', ') + ' and others';
-          }
+          return;
+        }
+        this.isLoading = true;
+        this.errorMessage = '';
+        axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.searchTerm)}`)
+          .then(response => {
+            this.searchResults = response.data.items || [];
+          })
+          .catch(e => {
+            this.errorMessage = 'حدث خطأ أثناء جلب البيانات.';
+            console.error('خطأ في البحث:', e);
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+      }, 300),
+      bookAuthors(book) {
+        let authors = book.volumeInfo.authors || [];
+        if (authors.length < 3) {
+          return authors.join('، ');
+        } else {
+          return authors.slice(0, 2).join('، ') + ' وآخرون';
         }
       }
-    });
-  </script>
+    }
+  });
+  console.log('تم تهيئة Vue بنجاح');
+} catch (error) {
+  console.error('خطأ في تهيئة Vue:', error);
+  endStory();
+}
+}
+
+// تحميل المكتبات وتهيئة Vue
+loadScripts();
+setTimeout(() => {
+if (window.Vue && window.axios && window._) {
+  initVue();
+} else {
+  console.error('فشل تحميل المكتبات، إظهار التطبيق بدون Vue');
+  endStory();
+}
+}, 2000);
+</script>
 </body>
 </html>
