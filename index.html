@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -42,7 +81,7 @@
       text-align: center;
     }
 
-    svg {
+    svg.logo {
       width: 160px;
       height: 160px;
       display: block;
@@ -60,6 +99,11 @@
       direction: rtl;
       font-size: 1.1rem;
       line-height: 1.6;
+      display: none;
+    }
+
+    .story-section.active {
+      display: block;
     }
 
     .story-section h2 {
@@ -238,6 +282,37 @@
       font-size: 0.9rem;
     }
 
+    .icon-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 15px;
+      z-index: 1000;
+    }
+
+    .icon-button {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: background 250ms;
+    }
+
+    .icon-button:hover {
+      background: rgba(255, 255, 250, 1);
+    }
+
+    .icon-button svg {
+      width: 24px;
+      height: 24px;
+    }
+
     @media (max-width: 768px) {
       .v {
         width: 90%;
@@ -253,12 +328,25 @@
         padding: 15px;
         font-size: 1rem;
       }
+      .icon-container {
+        top: 10px;
+        right: 10px;
+        gap: 10px;
+      }
+      .icon-button {
+        width: 35px;
+        height: 35px;
+      }
+      .icon-button svg {
+        width: 20px;
+        height: 20px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="top">
-    <svg viewBox="0 0 160 160" width="160" height="160">
+    <svg class="logo" viewBox="0 0 160 160" width="160" height="160">
       <circle cx="80" cy="80" r="50" fill="#ccc" />
       <g transform="matrix(0.866, -0.5, 0.25, 0.433, 80, 80)">
         <path d="M 0,70 A 65,70 0 0,0 65,0 5,5 0 0,1 75,0 75,70 0 0,1 0,70Z" fill="#FFF">
@@ -269,10 +357,22 @@
     </svg>
   </div>
 
+  <div class="icon-container">
+    <div class="icon-button" id="toggle-story">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path id="toggle-icon" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </div>
+    <a href="https://docs.google.com/document/d/16Z93SulV4N3pqbRys4U_ri8-0W5WTzRovks6ZucW2jo/edit?usp=sharing" download class="icon-button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 15V3m0 12l-4-4m4 4l4-4M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+      </svg>
+    </a>
+  </div>
+
   <div id="app">
     <main>
-      <section class="story-section">
-      
+      <section class="story-section" id="story-content">
         <p><strong>نحن قوم أعزَّنا الله بالإسلام، فمهما ابتغينا العزَّة في غيره أذلَّنا الله</strong> — كلمات عمر بن الخطاب رضي الله عنه تُلخِّص حقيقةً تاريخيةً غُيِّبت عمدًا: أنَّ الحضارة الإسلامية كانت منارةَ العلم التي استمدَّ منها الغربُ أسسَ نهضته. فلماذا يُدرَّس نيوتن وغاليليو في مناهجنا، بينما يُنسى ابن الهيثم الذي سبقهم بقرون؟</p>
         <p>يُعدّ الحسن بن الهيثم (965-1040م)، المعروف في الغرب باسم <em>Alhazen</em>، أحد أعظم العلماء في التاريخ، ورائدًا في علم البصريات والمنهج العلمي. وُلد في البصرة وأمضى حياته في بغداد والقاهرة، حيث غيّر مسار العلوم بإسهاماته الخالدة.</p>
         <p>يُلقَّب بـ<em>أبي البصريات</em> بفضل كتابه <em>كتاب المناظر</em>، الذي وضع فيه أسس علم البصريات الحديث. فقد أثبت أن الضوء يسير في خطوط مستقيمة، وشرح انعكاسه وانكساره بدقة علمية غير مسبوقة. كما قدّم التفسير الصحيح للرؤية، مؤكدًا أن العين تتلقى الضوء من الأجسام، وليس العكس كما كان سائدًا في عصره.</p>
@@ -360,6 +460,20 @@
             return authors.slice(0, 2).join(', ') + ' and others';
           }
         }
+      }
+    });
+
+    // Toggle story section
+    const toggleButton = document.getElementById('toggle-story');
+    const storyContent = document.getElementById('story-content');
+    const toggleIcon = document.getElementById('toggle-icon');
+
+    toggleButton.addEventListener('click', () => {
+      storyContent.classList.toggle('active');
+      if (storyContent.classList.contains('active')) {
+        toggleIcon.setAttribute('d', 'M6 18L18 6M6 6l12 12'); // X icon
+      } else {
+        toggleIcon.setAttribute('d', 'M4 6h16M4 12h16M4 18h16'); // Hamburger icon
       }
     });
   </script>
