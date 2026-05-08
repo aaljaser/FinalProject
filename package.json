@@ -1,6 +1,6 @@
 {
-  "name": "a0-project",
-  "version": "1.0.0",
+  "name": "basira",
+  "version": "0.2.0",
   "license": "0BSD",
   "private": true,
   "main": "index.ts",
@@ -8,7 +8,10 @@
     "start": "npx expo start",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
-    "web": "npx expo start --web"
+    "web": "npx expo start --web",
+    "typecheck": "tsc --noEmit",
+    "build": "echo \"Basira is an Expo app — use 'npx expo export' or EAS Build for native builds.\"",
+    "test": "echo \"No automated tests yet — see README for manual test plan.\" && exit 0"
   },
   "dependencies": {
     "@expo/vector-icons": "latest",

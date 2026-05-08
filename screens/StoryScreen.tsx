@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -43,7 +43,7 @@ export default function StoryScreen({ navigation }: any) {
 
   const handleSkip = () => {
     navigation.replace('Home');
-  };  const { width: screenWidth } = useWindowDimensions();
+  };
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function StoryScreen({ navigation }: any) {
 
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
             <Text style={styles.nextButtonText}>
-              {currentPartIndex === storyParts.length - 1 ? 'ابدأ' : 'التالي'}
+              {currentPartIndex === storyParts.length - 1 ? 'ابدأ مع بصيرة' : 'التالي'}
             </Text>
           </TouchableOpacity>
         </View>
