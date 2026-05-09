@@ -2,6 +2,8 @@
 
 Basira (بصيرة, "insight") is an Arabic-first React Native / Expo app for discovering books. It opens with a short story honouring **Ibn al-Haytham (Alhazen)** — the father of optics — and then lets the reader search for books or scan an ISBN with the camera.
 
+> **GitHub Pages vs the Expo app** — the live site at [`aaljaser.github.io/FinalProject`](https://aaljaser.github.io/FinalProject) serves the root `index.html` as a Basira v0.2.0 landing page with a working Google Books search. ISBN camera scanning is mobile-only (it requires `expo-camera`), so the Pages site links out to the v0.2.0 release and the repo for the full Expo app.
+
 ## Features
 
 - **Real book search** powered by the public [Google Books API](https://developers.google.com/books/docs/v1/using).
