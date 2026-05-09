@@ -1,184 +1,312 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Dimensions } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  Linking,
+  I18nManager,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Book } from '../services/googleBooks';
+import { useBookSearch } from '../hooks/useBookSearch';
 
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  coverImage: string;
-  rating: number;
+interface SearchBarProps {
+  value: string;
+  onChange: (text: string) => void;
+  onScanPress: () => void;
 }
 
-const MOCK_BOOKS: Book[] = [
-  {
-    id: '1',
-    title: 'The Art of Science',
-    author: 'Abdulkarim Aljaser',
-    coverImage: 'https://api.a0.dev/assets/image?text=science%20book%20cover%20arabic%20style&seed=1',
-    rating: 4.5
-  },
-  {
-    id: '2',
-    title: 'Digital Innovation',
-    author: 'Tech Pioneers',
-    coverImage: 'https://api.a0.dev/assets/image?text=modern%20tech%20book%20cover%20arabic%20style&seed=2',
-    rating: 4.8
-  },
-  {
-    id: '3',
-    title: 'Future of AI',
-    author: 'Data Scientists',
-    coverImage: 'https://api.a0.dev/assets/image?text=AI%20book%20cover%20futuristic%20arabic&seed=3',
-    rating: 4.2
-  }
-];
-
-const SearchBar = ({ onSearch }: { onSearch: (text: string) => void }) => (
+const SearchBar = ({ value, onChange, onScanPress }: SearchBarProps) => (
   <View style={styles.searchContainer}>
-    <MaterialCommunityIcons name="magnify" size={24} color="#666" style={styles.searchIcon} />
+    <MaterialCommunityIcons name="magnify" size={22} color="#cfd8dc" style={styles.searchIcon} />
     <TextInput
       style={styles.searchInput}
-      placeholder="Search books..."
-      placeholderTextColor="#666"
-      onChangeText={onSearch}
+      placeholder="ابحث عن كتاب أو مؤلف..."
+      placeholderTextColor="#9aa6ab"
+      onChangeText={onChange}
+      value={value}
+      textAlign={I18nManager.isRTL ? 'left' : 'right'}
+      returnKeyType="search"
+      autoCorrect={false}
     />
+    <TouchableOpacity
+      style={styles.scanButton}
+      onPress={onScanPress}
+      accessibilityRole="button"
+      accessibilityLabel="مسح رمز ISBN بالكاميرا"
+    >
+      <MaterialCommunityIcons name="barcode-scan" size={22} color="#fff" />
+    </TouchableOpacity>
   </View>
 );
 
-const BookCard = ({ book }: { book: Book }) => (
-  <TouchableOpacity style={styles.bookCard}>
-    <Image source={{ uri: book.coverImage }} style={styles.bookCover} />
-    <View style={styles.bookInfo}>
-      <Text style={styles.bookTitle}>{book.title}</Text>
-      <Text style={styles.bookAuthor}>{book.author}</Text>
-      <View style={styles.ratingContainer}>
-        {[...Array(5)].map((_, index) => (
-          <MaterialCommunityIcons
-            key={index}
-            name={index < Math.floor(book.rating) ? 'star' : 'star-outline'}
-            size={16}
-            color={index < Math.floor(book.rating) ? '#FFD700' : '#666'}
-          />
-        ))}
-        <Text style={styles.ratingText}>{book.rating}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
+const formatYear = (publishedDate?: string): string | undefined => {
+  if (!publishedDate) return undefined;
+  const match = publishedDate.match(/^(\d{4})/);
+  return match ? match[1] : publishedDate;
+};
 
-export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [books, setBooks] = React.useState<Book[]>(MOCK_BOOKS);
+const BookCard = ({ book }: { book: Book }) => {
+  const year = formatYear(book.publishedDate);
+  const authors = book.authors.length > 0 ? book.authors.join('، ') : 'مؤلف غير معروف';
 
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-    const filteredBooks = MOCK_BOOKS.filter(book => 
-      book.title.toLowerCase().includes(text.toLowerCase()) ||
-      book.author.toLowerCase().includes(text.toLowerCase())
-    );
-    setBooks(filteredBooks);
+  const onPress = () => {
+    if (book.infoLink) {
+      Linking.openURL(book.infoLink).catch(() => {});
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={['#2e4a4f', '#101110bc']}
-        style={styles.gradient}
-      >
-        <View style={styles.header}>
-          <Text style={styles.title}>Aljaser Books</Text>
-          <Text style={styles.subtitle}>Discover your next favorite book</Text>
+    <TouchableOpacity style={styles.bookCard} activeOpacity={0.85} onPress={onPress}>
+      {book.coverImage ? (
+        <Image source={{ uri: book.coverImage }} style={styles.bookCover} />
+      ) : (
+        <View style={[styles.bookCover, styles.bookCoverPlaceholder]}>
+          <MaterialCommunityIcons name="book-open-page-variant" size={32} color="#cfd8dc" />
         </View>
-        
-        <SearchBar onSearch={handleSearch} />
-        
-        <ScrollView style={styles.booksContainer}>
-          {books.map(book => (
-            <BookCard key={book.id} book={book} />
-          ))}
-        </ScrollView>
+      )}
+      <View style={styles.bookInfo}>
+        <Text style={styles.bookTitle} numberOfLines={2}>
+          {book.title}
+        </Text>
+        <Text style={styles.bookAuthor} numberOfLines={1}>
+          {authors}
+        </Text>
+        {year ? <Text style={styles.bookMeta}>سنة النشر: {year}</Text> : null}
+        {book.description ? (
+          <Text style={styles.bookDescription} numberOfLines={3}>
+            {book.description}
+          </Text>
+        ) : null}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const StateMessage = ({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  title: string;
+  subtitle?: string;
+}) => (
+  <View style={styles.stateContainer}>
+    <MaterialCommunityIcons name={icon} size={56} color="rgba(255,255,255,0.7)" />
+    <Text style={styles.stateTitle}>{title}</Text>
+    {subtitle ? <Text style={styles.stateSubtitle}>{subtitle}</Text> : null}
+  </View>
+);
+
+export default function HomeScreen({ navigation }: any) {
+  const [query, setQuery] = useState('');
+  const { books, status, error } = useBookSearch(query);
+
+  const goToScanner = () => {
+    navigation.navigate('Scan');
+  };
+
+  const content = useMemo(() => {
+    if (status === 'idle') {
+      return (
+        <StateMessage
+          icon="book-search-outline"
+          title="ابدأ بالبحث"
+          subtitle="اكتب اسم كتاب أو مؤلف، أو امسح رمز ISBN لاستكشاف العناوين."
+        />
+      );
+    }
+
+    if (status === 'loading') {
+      return (
+        <View style={styles.stateContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={styles.stateTitle}>جارٍ البحث...</Text>
+        </View>
+      );
+    }
+
+    if (status === 'error') {
+      return (
+        <StateMessage
+          icon="wifi-alert"
+          title="تعذّر الاتصال"
+          subtitle={error ?? 'يرجى التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى.'}
+        />
+      );
+    }
+
+    if (status === 'success' && books.length === 0) {
+      return (
+        <StateMessage
+          icon="book-remove-outline"
+          title="لا توجد نتائج"
+          subtitle="جرّب كلمات بحث مختلفة، أو تأكد من صحة رمز ISBN."
+        />
+      );
+    }
+
+    return (
+      <FlatList
+        data={books}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <BookCard book={item} />}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+    );
+  }, [status, books, error]);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <LinearGradient colors={['#2e4a4f', '#101110']} style={styles.gradient}>
+        <View style={styles.header}>
+          <Text style={styles.title}>بصيرة</Text>
+          <Text style={styles.subtitle}>اكتشف الكتب على خطى ابن الهيثم</Text>
+        </View>
+
+        <SearchBar value={query} onChange={setQuery} onScanPress={goToScanner} />
+
+        <View style={styles.contentArea}>{content}</View>
       </LinearGradient>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  gradient: {
-    flex: 1,
-  },
+  container: { flex: 1 },
+  gradient: { flex: 1 },
   header: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 8,
+    marginBottom: 4,
+    writingDirection: 'rtl',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#ccc',
+    fontSize: 14,
+    color: '#cfd8dc',
+    writingDirection: 'rtl',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    margin: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    marginHorizontal: 20,
+    marginVertical: 12,
     borderRadius: 12,
-    padding: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   searchIcon: {
-    marginRight: 10,
+    marginHorizontal: 6,
   },
   searchInput: {
     flex: 1,
     color: '#fff',
     fontSize: 16,
+    paddingVertical: 8,
   },
-  booksContainer: {
-    padding: 20,
+  scanButton: {
+    backgroundColor: '#3f6b71',
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
+  },
+  contentArea: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   bookCard: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
+    padding: 12,
+    marginBottom: 12,
   },
   bookCover: {
-    width: 80,
-    height: 120,
+    width: 72,
+    height: 108,
     borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  bookCoverPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bookInfo: {
     flex: 1,
-    marginLeft: 15,
+    marginHorizontal: 12,
   },
   bookTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 8,
+    marginBottom: 4,
+    writingDirection: 'rtl',
+    textAlign: 'right',
   },
   bookAuthor: {
     fontSize: 14,
-    color: '#ccc',
-    marginBottom: 8,
+    color: '#cfd8dc',
+    marginBottom: 4,
+    writingDirection: 'rtl',
+    textAlign: 'right',
   },
-  ratingContainer: {
-    flexDirection: 'row',
+  bookMeta: {
+    fontSize: 12,
+    color: '#9aa6ab',
+    marginBottom: 4,
+    writingDirection: 'rtl',
+    textAlign: 'right',
+  },
+  bookDescription: {
+    fontSize: 12,
+    color: '#cfd8dc',
+    lineHeight: 18,
+    writingDirection: 'rtl',
+    textAlign: 'right',
+  },
+  stateContainer: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
   },
-  ratingText: {
-    color: '#ccc',
-    marginLeft: 8,
+  stateTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+    textAlign: 'center',
+    writingDirection: 'rtl',
+  },
+  stateSubtitle: {
+    color: '#cfd8dc',
     fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 22,
+    writingDirection: 'rtl',
   },
 });
