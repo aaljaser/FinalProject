@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <title>بصيرة · Basira — اكتشف الكتب على خطى ابن الهيثم</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="بصيرة (Basira) — تطبيق Expo عربي لاكتشاف الكتب عبر بحث Google Books ومسح رمز ISBN بالكاميرا. الإصدار 0.2.0.">
+<meta name="description" content="بصيرة (Basira) — تطبيق Angular عربي لاكتشاف الكتب عبر بحث Google Books. الإصدار 0.2.0.">
 <meta name="theme-color" content="#2e4a4f">
 <meta property="og:title" content="بصيرة · Basira v0.2.0">
-<meta property="og:description" content="تطبيق عربي لاكتشاف الكتب — بحث حي عبر Google Books ومسح ISBN بالكاميرا.">
+<meta property="og:description" content="تطبيق Angular عربي لاكتشاف الكتب — بحث حي عبر Google Books.">
 <meta property="og:type" content="website">
 <link rel="icon" href="./assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -378,11 +378,11 @@ footer.site-footer a { color: var(--muted); }
   <header class="brand">
     <h1>بصيرة</h1>
     <div class="latin">Basira</div>
-    <p class="tagline">اكتشف الكتب على خطى ابن الهيثم — بحث حي عبر Google Books ومسح رمز ISBN بالكاميرا.</p>
+    <p class="tagline">اكتشف الكتب على خطى ابن الهيثم — بحث حي عبر Google Books.</p>
     <div class="badges">
       <span class="badge version">الإصدار 0.2.0</span>
-      <span class="badge">Expo · React Native</span>
-      <span class="badge">عربي · RTL</span>
+      <span class="badge">Angular</span>
+      <span class="badge">عربي</span>
     </div>
   </header>
 
@@ -410,24 +410,12 @@ footer.site-footer a { color: var(--muted); }
     </div>
   </section>
 
-  <aside class="mobile-cta" aria-labelledby="cta-heading">
-    <div class="cta-text">
-      <h3 id="cta-heading">📷 مسح رمز ISBN يحتاج تطبيق الجوال</h3>
-      <p>مسح الرمز الشريطي بالكاميرا متاح في تطبيق Expo على iOS وأندرويد. حمّل الإصدار <strong>v0.2.0</strong> من صفحة الإصدارات أو شغّل التطبيق محليًا عبر Expo Go.</p>
-    </div>
-    <div class="cta-actions">
-      <a class="btn" href="https://github.com/aaljaser/FinalProject/releases/tag/v0.2.0" target="_blank" rel="noopener">صفحة الإصدار v0.2.0</a>
-      <a class="btn secondary" href="https://github.com/aaljaser/FinalProject" target="_blank" rel="noopener">المستودع على GitHub</a>
-    </div>
-  </aside>
-
-  <section class="release" aria-labelledby="release-heading">
+<section class="release" aria-labelledby="release-heading">
     <h2 id="release-heading">ما الجديد في v0.2.0</h2>
     <ul>
       <li><strong>تسمية جديدة:</strong> أصبح اسم التطبيق <em>بصيرة (Basira)</em> ليعكس تراث ابن الهيثم في علم البصريات.</li>
       <li><strong>بحث حقيقي:</strong> بحث حي عبر Google Books مع حالات تحميل وفراغ وخطأ، وروابط أغلفة آمنة (HTTPS).</li>
-      <li><strong>مسح ISBN بالكاميرا:</strong> شاشة مسح جديدة عبر <code>expo-camera</code> مع إدارة كاملة لإذن الكاميرا.</li>
-      <li><strong>تلميع عربي:</strong> نصوص عربية شاملة ومحاذاة RTL وبطاقات نتائج معاد تصميمها.</li>
+      <li><strong>إطار Angular:</strong> تم تحديث وصف المشروع ليعتمد على إطار Angular بدلًا من React.</li>
     </ul>
   </section>
 
@@ -443,7 +431,7 @@ footer.site-footer a { color: var(--muted); }
 <div class="modal-backdrop" id="scan-modal" role="dialog" aria-modal="true" aria-labelledby="scan-modal-title">
   <div class="modal">
     <h3 id="scan-modal-title">📷 مسح رمز ISBN</h3>
-    <p>هذه الميزة متاحة في تطبيق الجوال (Expo) عبر كاميرا الجهاز. للاستخدام السريع، اكتب رقم ISBN في خانة البحث أعلاه أو حمّل التطبيق من صفحة الإصدار.</p>
+    <p>للاستخدام السريع، اكتب رقم ISBN في خانة البحث أعلاه. ميزة مسح الكاميرا غير متاحة في إصدار الويب الحالي.</p>
     <div class="modal-actions">
       <a class="btn" href="https://github.com/aaljaser/FinalProject/releases/tag/v0.2.0" target="_blank" rel="noopener">صفحة الإصدار v0.2.0</a>
       <button class="btn secondary" type="button" id="scan-close">إغلاق</button>
