@@ -2,12 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>بصيرة · Basira — اكتشف الكتب على خطى ابن الهيثم</title>
+<title>بصيرة · Basira — اكتشف الكتب بالعربية</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="بصيرة (Basira) — تطبيق Expo عربي لاكتشاف الكتب عبر بحث Google Books ومسح رمز ISBN بالكاميرا. الإصدار 0.2.0.">
+<meta name="description" content="بصيرة (Basira) — تطبيق عربي لاكتشاف الكتب: بحث حي عبر Google Books، مسح رمز ISBN بالكاميرا، وواجهة عربية RTL. الإصدار 0.2.0.">
 <meta name="theme-color" content="#2e4a4f">
-<meta property="og:title" content="بصيرة · Basira v0.2.0">
-<meta property="og:description" content="تطبيق عربي لاكتشاف الكتب — بحث حي عبر Google Books ومسح ISBN بالكاميرا.">
+<meta property="og:title" content="بصيرة · Basira v0.2.0 — اكتشاف الكتب بالعربية">
+<meta property="og:description" content="تطبيق عربي لاكتشاف الكتب — بحث حي عبر Google Books ومسح ISBN بالكاميرا، بواجهة عربية RTL.">
 <meta property="og:type" content="website">
 <link rel="icon" href="./assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -321,17 +321,39 @@ header.brand {
 .release li { margin-bottom: 6px; }
 .release li strong { color: #fff; font-weight: 600; }
 
-/* Heritage note */
-.heritage {
-  margin-top: 28px;
-  text-align: center;
+/* Cultural inspiration (separate from product hero) */
+.inspiration {
+  margin-top: 36px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--accent-strong);
+  border-radius: var(--radius);
+  padding: 22px 22px;
+}
+.inspiration .eyebrow {
+  display: inline-block;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.inspiration h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  color: #fff;
+}
+.inspiration p {
+  margin: 0 0 10px;
   color: var(--muted);
   font-size: 0.95rem;
-  max-width: 640px;
-  margin-inline: auto;
-  padding: 0 8px;
+  line-height: 1.75;
 }
-.heritage em { color: #fff; font-style: normal; font-weight: 600; }
+.inspiration p:last-child { margin-bottom: 0; }
+.inspiration strong { color: #fff; font-weight: 600; }
 
 footer.site-footer {
   margin-top: 36px;
@@ -378,7 +400,7 @@ footer.site-footer a { color: var(--muted); }
   <header class="brand">
     <h1>بصيرة</h1>
     <div class="latin">Basira</div>
-    <p class="tagline">اكتشف الكتب على خطى ابن الهيثم — بحث حي عبر Google Books ومسح رمز ISBN بالكاميرا.</p>
+    <p class="tagline">اكتشاف الكتب بالعربية — بحث حي عبر Google Books، مسح رمز ISBN بالكاميرا، وواجهة عربية RTL.</p>
     <div class="badges">
       <span class="badge version">الإصدار 0.2.0</span>
       <span class="badge">Expo · React Native</span>
@@ -424,16 +446,23 @@ footer.site-footer a { color: var(--muted); }
   <section class="release" aria-labelledby="release-heading">
     <h2 id="release-heading">ما الجديد في v0.2.0</h2>
     <ul>
-      <li><strong>تسمية جديدة:</strong> أصبح اسم التطبيق <em>بصيرة (Basira)</em> ليعكس تراث ابن الهيثم في علم البصريات.</li>
+      <li><strong>تسمية جديدة:</strong> أصبح اسم التطبيق <em>بصيرة (Basira)</em> — كلمة عربية تعني الإدراك والرؤية الواضحة.</li>
       <li><strong>بحث حقيقي:</strong> بحث حي عبر Google Books مع حالات تحميل وفراغ وخطأ، وروابط أغلفة آمنة (HTTPS).</li>
       <li><strong>مسح ISBN بالكاميرا:</strong> شاشة مسح جديدة عبر <code>expo-camera</code> مع إدارة كاملة لإذن الكاميرا.</li>
       <li><strong>تلميع عربي:</strong> نصوص عربية شاملة ومحاذاة RTL وبطاقات نتائج معاد تصميمها.</li>
     </ul>
   </section>
 
-  <p class="heritage">
-    سُمّي التطبيق <em>بصيرة</em> تكريمًا لـ <strong>الحسن بن الهيثم</strong> (965–1040م) — أبو البصريات وأحد روّاد المنهج العلمي.
-  </p>
+  <section class="inspiration" aria-labelledby="inspiration-heading">
+    <span class="eyebrow">الإلهام الثقافي</span>
+    <h2 id="inspiration-heading">من وحي ابن الهيثم</h2>
+    <p>
+      اسم <strong>بصيرة</strong> كلمة عربية تعني الإدراك والرؤية الواضحة، ويستلهم روحه من إرث <strong>الحسن بن الهيثم</strong> (965–1040م) — أبو البصريات وأحد روّاد المنهج العلمي.
+    </p>
+    <p>
+      هذا القسم تحية ثقافية فحسب؛ التطبيق نفسه أداة لاكتشاف الكتب: بحث حي وواجهة عربية ومسح ISBN على الجوال — لا أكثر ولا أقل.
+    </p>
+  </section>
 
   <footer class="site-footer">
     <p>صنع بواسطة <strong>عبدالكريم الجاسر</strong> · <a href="https://github.com/aaljaser/FinalProject" target="_blank" rel="noopener">المصدر على GitHub</a></p>
